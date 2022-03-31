@@ -92,7 +92,7 @@ class World:
         self.opposites = {0: 2, 1: 3, 2: 0, 3: 1}
 
         if board_size is None:
-            # Random chessboard size
+            # Random chessboard size(return a random int number between min and max)
             self.board_size = np.random.randint(MIN_BOARD_SIZE, MAX_BOARD_SIZE)
             logger.info(
                 f"No board size specified. Randomly generating size : {self.board_size}x{self.board_size}"
