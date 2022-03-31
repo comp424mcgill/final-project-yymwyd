@@ -36,5 +36,18 @@ class StudentAgent(Agent):
 
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
+        
         # dummy return
         return my_pos, self.dir_map["u"]
+
+    
+    
+    #find current state chessboard
+
+    #put all children in a stack
+
+    #run simultions on each children until the time is reached
+
+    #get UCT scores from each child nodes
+
+    #find the best child and return the best child (my_pos, dir) 
