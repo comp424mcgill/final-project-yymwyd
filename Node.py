@@ -8,6 +8,7 @@ class Node:
                 #initialize node number of success
                 self.num_success = 0
                 self.my_pos = my_pos
+                self.dir = dir
                 
                 
                 
