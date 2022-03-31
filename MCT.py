@@ -1,6 +1,6 @@
 import math
 
-class MCTS:
+class Node:
         #initiate MCT 
         def __init__(self, num_visited, num_success):
                 #initialize node number of visited
