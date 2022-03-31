@@ -40,14 +40,15 @@ class StudentAgent(Agent):
         # dummy return
         return my_pos, self.dir_map["u"]
 
-    
-    
-    #find current state chessboard
 
-    #put all children in a stack
 
-    #run simultions on each children until the time is reached
 
-    #get UCT scores from each child nodes
+    #start from the current chessboard
 
-    #find the best child and return the best child (my_pos, dir) 
+    #if get the first round, run simulations until resources are used up
+
+    #for each simulations, backpropagate values of nodes(visited times, number of success)
+
+    #calculate UCTs for the direct children and find the best one
+
+    #expand the node by returning this child
