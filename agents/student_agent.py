@@ -37,11 +37,11 @@ class StudentAgent(Agent):
 
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
-        
+        #store all the paths into this array
+            listOfPath = []
+
         #generate all simulations
         while time + space resources are left:
-            #store all the paths into this array
-            listOfPath = []
             #returns a path
             Path = stimulChild(chess_board, my_pos, adv_pos)
             listOfPath.append(Path)
