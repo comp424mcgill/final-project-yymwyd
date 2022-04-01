@@ -10,6 +10,27 @@ from store import AGENT_REGISTRY
 from constants import *
 import sys
 
+import signal
+from contextlib import contextmanager
+
+
+class TimeoutException(Exception):
+    pass
+
+
+@contextmanager
+def time_limit(seconds):
+    def signal_handler(signum, frame):
+        raise TimeoutException("Execution timed out!")
+
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(seconds)
+    try:
+        yield
+    finally:
+        signal.alarm(0)
+
+
 logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.INFO)
 
 logger = logging.getLogger(__name__)
@@ -29,7 +50,6 @@ class World:
     ):
         """
         Initialize the game world
-
         Parameters
         ----------
         player_1: str
@@ -92,7 +112,7 @@ class World:
         self.opposites = {0: 2, 1: 3, 2: 0, 3: 1}
 
         if board_size is None:
-            # Random chessboard size(return a random int number between min and max)
+            # Random chessboard size
             self.board_size = np.random.randint(MIN_BOARD_SIZE, MAX_BOARD_SIZE)
             logger.info(
                 f"No board size specified. Randomly generating size : {self.board_size}x{self.board_size}"
@@ -145,6 +165,10 @@ class World:
         self.p0_time = 0
         self.p1_time = 0
 
+        # Player step count
+        self.p0_step = 0
+        self.p1_step = 0
+
         # Cache to store and use the data
         self.results_cache = ()
         # UI Engine
@@ -163,7 +187,6 @@ class World:
     def get_current_player(self):
         """
         Get the positions of the current player
-
         Returns
         -------
         tuple of (current_player_obj, current_player_pos, adversary_player_pos)
@@ -176,7 +199,6 @@ class World:
     def update_player_time(self, time_taken):
         """
         Update the time taken by the player
-
         Parameters
         ----------
         time_taken : float
@@ -187,12 +209,32 @@ class World:
         else:
             self.p1_time += time_taken
 
+    def get_current_player_step(self):
+        """
+        Get the step count of the current player
+        Returns
+        -------
+        int
+        """
+        if not self.turn:
+            return self.p0_step
+        else:
+            return self.p1_step
+
+    def update_player_step(self):
+        """
+        Update the steps taken by the player
+        """
+        if not self.turn:
+            self.p0_step += 1
+        else:
+            self.p1_step += 1
+
     def step(self):
         """
         Take a step in the game world.
         Runs the agents' step function and update the game board accordingly.
         If the agents' step function raises an exception, the step will be replaced by a Random Walk.
-
         Returns
         -------
         results: tuple
@@ -201,37 +243,50 @@ class World:
         cur_player, cur_pos, adv_pos = self.get_current_player()
 
         try:
-            # Run the agents step function
-            start_time = time()
-            next_pos, dir = cur_player.step(
-                deepcopy(self.chess_board),
-                tuple(cur_pos),
-                tuple(adv_pos),
-                self.max_step,
-            )
-            self.update_player_time(time() - start_time)
+            cur_player_step = self.get_current_player_step()
+            # Get allowed time in this step
+            if cur_player_step == 0:
+                allowed_time_seconds = 30
+            else:
+                allowed_time_seconds = 2
+            # Method to enforce time limit
+            with time_limit(allowed_time_seconds):
+                # Run the agents step function
+                self.update_player_step()
+                start_time = time()
+                next_pos, dir = cur_player.step(
+                    deepcopy(self.chess_board),
+                    tuple(cur_pos),
+                    tuple(adv_pos),
+                    self.max_step,
+                )
+                self.update_player_time(time() - start_time)
 
-            next_pos = np.asarray(next_pos, dtype=cur_pos.dtype)
-            if not self.check_boundary(next_pos):
-                raise ValueError("End position {} is out of boundary".format(next_pos))
-            if not 0 <= dir <= 3:
-                raise ValueError(
-                    "Barrier dir should reside in [0, 3], but your dir is {}".format(
-                        dir
+                next_pos = np.asarray(next_pos, dtype=cur_pos.dtype)
+                if not self.check_boundary(next_pos):
+                    raise ValueError(
+                        "End position {} is out of boundary".format(next_pos)
                     )
-                )
-            if not self.check_valid_step(cur_pos, next_pos, dir):
-                raise ValueError(
-                    "Not a valid step from {} to {} and put barrier at {}, with max steps = {}".format(
-                        cur_pos, next_pos, dir, self.max_step
+                if not 0 <= dir <= 3:
+                    raise ValueError(
+                        "Barrier dir should reside in [0, 3], but your dir is {}".format(
+                            dir
+                        )
                     )
-                )
+                if not self.check_valid_step(cur_pos, next_pos, dir):
+                    raise ValueError(
+                        "Not a valid step from {} to {} and put barrier at {}, with max steps = {}".format(
+                            cur_pos, next_pos, dir, self.max_step
+                        )
+                    )
         except BaseException as e:
             ex_type = type(e).__name__
             if (
                 "SystemExit" in ex_type and isinstance(cur_player, HumanAgent)
             ) or "KeyboardInterrupt" in ex_type:
                 sys.exit(0)
+            if "TimeoutException" in ex_type:
+                print("Step call took too long.")
             print(
                 "An exception raised. The traceback is as follows:\n{}".format(
                     traceback.format_exc()
@@ -275,7 +330,6 @@ class World:
     def check_valid_step(self, start_pos, end_pos, barrier_dir):
         """
         Check if the step the agent takes is valid (reachable and within max steps).
-
         Parameters
         ----------
         start_pos : tuple
@@ -323,7 +377,6 @@ class World:
     def check_endgame(self):
         """
         Check if the game ends and compute the current score of the agents.
-
         Returns
         -------
         is_endgame : bool
@@ -400,7 +453,6 @@ class World:
     def random_walk(self, my_pos, adv_pos):
         """
         Randomly walk to the next position in the board.
-
         Parameters
         ----------
         my_pos : tuple
