@@ -3,6 +3,7 @@ from agents.agent import Agent
 from store import register_agent
 import sys
 from world import World, PLAYER_1_NAME, PLAYER_2_NAME
+from Node import*
 
 @register_agent("student_agent")
 class StudentAgent(Agent):
