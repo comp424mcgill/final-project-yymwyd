@@ -2,7 +2,8 @@
 from agents.agent import Agent
 from store import register_agent
 import sys
-from world import World, PLAYER_1_NAME, PLAYER_2_NAME
+from world import*
+#World, PLAYER_1_NAME, PLAYER_2_NAME
 from Node import*
 
 @register_agent("student_agent")
@@ -37,6 +38,8 @@ class StudentAgent(Agent):
 
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
+
+        
         #store all the paths into this array
         listOfPath = []
 
@@ -91,3 +94,4 @@ class StudentAgent(Agent):
     #calculate UCTs for the direct children and find the best one
 
     #expand the node by returning this child
+
