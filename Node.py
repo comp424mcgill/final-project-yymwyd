@@ -1,5 +1,3 @@
-import math
-
 class Node:
         #initiate Node 
         def __init__(self, my_pos, dir):

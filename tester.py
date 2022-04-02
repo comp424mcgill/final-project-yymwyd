@@ -1,16 +1,17 @@
 #tester file
-from Node import *
+from node import Node
 
 
 #unit test for backpropagation
 #assume all those are successful
 def backpropagation(listOfPaths):
-    
+    pass
 def main():
     listOfPaths = []
     Path1 = []
     Path2 = []
-    Path 3 = []
+    Path3 = []
+    
     N1 = Node((1,2),0)
     N2 = Node((3,4),1)
     N3 = Node((5,6),2)
@@ -36,20 +37,21 @@ def main():
     listOfPaths.append(Path2)
     listOfPaths.append(Path3)
 
-    #show values before backpropagation
-    for list in updatedList:
-        for Node in list:
-            print("This is the updated number of success:\n", Node.get_wins())
-            print("This is the updated number of visited:\n", Node.get_visits())
-
     updatedList = backpropagation(listOfPaths)
 
+    #show values before backpropagation
+    for list in listOfPaths:
+        for n in list:
+            print("This is the updated number of success:\n", n.get_wins())
+            print("This is the updated number of visited:\n", n.get_visits())
+
+    '''
     NumPath = len(updatedList)
     #show values are updated
     for list in updatedList:
-        for Node in list:
-            print("This is the updated number of success:\n", Node.get_wins())
-            print("This is the updated number of visited:\n", Node.get_visits())
-
+        for n in list:
+            print("This is the updated number of success:\n", n.get_wins())
+            print("This is the updated number of visited:\n", n.get_visits())
+'''
 if __name__ == "__main__":
     main()
