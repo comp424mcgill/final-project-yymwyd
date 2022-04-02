@@ -36,12 +36,20 @@ def main():
     listOfPaths.append(Path2)
     listOfPaths.append(Path3)
 
+    #show values before backpropagation
+    for list in updatedList:
+        for Node in list:
+            print("This is the updated number of success:\n", Node.get_wins())
+            print("This is the updated number of visited:\n", Node.get_visits())
+
     updatedList = backpropagation(listOfPaths)
 
     NumPath = len(updatedList)
-    for x in range(NumPath):
-        
-    
+    #show values are updated
+    for list in updatedList:
+        for Node in list:
+            print("This is the updated number of success:\n", Node.get_wins())
+            print("This is the updated number of visited:\n", Node.get_visits())
 
 if __name__ == "__main__":
     main()
