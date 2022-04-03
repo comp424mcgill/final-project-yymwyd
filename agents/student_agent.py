@@ -1,11 +1,13 @@
 # Student agent: Add your own agent here
-from agents.agent import Agent
-from store import register_agent
+#from agents.agent import Agent
+from agent import Agent
+from world import *
+import node
+#from store import register_agent
 import sys
-from world import*
-from node import*
 
-@register_agent("student_agent")
+
+#@register_agent("my_agent")
 class StudentAgent(Agent):
     """
     A dummy class for your implementation. Feel free to use this class to
@@ -38,6 +40,8 @@ class StudentAgent(Agent):
 
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
+
+        '''
         #store all the paths into this array
         listOfPath = []
 
@@ -53,42 +57,22 @@ class StudentAgent(Agent):
         bestNode = findBestNode(nodeUCT)
 
         return bestNode.my_pos, bestNode.dir
-        
+        '''
 
 
 
     
-    
+    '''
     #1 simulation 
     def simulChild(chess_board, my_pose, adv_pos):
         
         #a path that is found by 1 simulation counsisting of nodes
         path = []
-
+    '''
 
     #r+c = max_step
-    def getActions(self, my_pos, max_step):
-        r=0
-        c = max_step-r
-        actions = []
-        for r in max_step:
-            next_pos = (my_pos[0]+r, my_pos[1]+c)
-            next_pos2 = (my_pos[0]-r, my_pos[1]+c)
-            next_pos3 = (my_pos[0]+r, my_pos[1]+c)
-            next_pos4 = (my_pos[o]-r, my_pos[1]-c)
-            for i in 3:
-                if (check_valid_step(my_pos, next_pos, i)):
-                    actions.append(next_pos)
-                if (check_valid_step(my_pos, next_pos2, i)):
-                    actions.append(next_pos)
-                if (check_valid_step(my_pos, next_pos3, i)):
-                    actions.append(next_pos)
-                if (check_valid_step(my_pos, next_pos4, i)):
-                    actions.append(next_pos)
-        return actions
             
-
-
+'''
 
     #backpropagation during each simulation
 
@@ -129,3 +113,36 @@ class StudentAgent(Agent):
     #calculate UCTs for the direct children and find the best one
 
     #expand the node by returning this child
+'''
+
+
+def getActions(self, my_pos, step):
+    r = 0
+    c=0
+    c = step - r
+    actions = []
+    for r in step:
+        next_pos = (my_pos[0] + r, my_pos[1] + c)
+        next_pos2 = (my_pos[0] - r, my_pos[1] + c)
+        next_pos3 = (my_pos[0] + r, my_pos[1] + c)
+        next_pos4 = (my_pos[0] - r, my_pos[1] - c)
+        for i in 3:
+            if (world.check_valid_step(my_pos, next_pos, i)):
+                actions.append(next_pos)
+            if (world.check_valid_step(my_pos, next_pos2, i)):
+                actions.append(next_pos)
+            if (world.check_valid_step(my_pos, next_pos3, i)):
+                actions.append(next_pos)
+            if (world.check_valid_step(my_pos, next_pos4, i)):
+                actions.append(next_pos)
+    return actions
+
+def main():
+    my_pos = (3,4)
+
+    children = getActions((3,4), 3)
+    for i in range(len(children)):
+        print(children[i])
+
+if __name__ == "__main__":
+    main()
