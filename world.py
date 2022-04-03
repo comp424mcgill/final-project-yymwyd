@@ -302,7 +302,10 @@ class World:
             f"Player {self.player_names[self.turn]} moves to {next_pos} facing {self.dir_names[dir]}"
         )
         if not self.turn:
+            #test to see if this is the step where the state get updated. if yes, we could add a node here
+            #print(self.p0_pos)
             self.p0_pos = next_pos
+           # print(self.p0_pos)
         else:
             self.p1_pos = next_pos
         # Set the barrier to True
