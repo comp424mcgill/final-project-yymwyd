@@ -70,9 +70,22 @@ class StudentAgent(Agent):
     def getActions(self, my_pos, max_step):
         r=0
         c = max_step-r
+        actions = []
         for r in max_step:
-            my_pos[0]+r
-            my_pos[0]-r
+            next_pos = (my_pos[0]+r, my_pos[1]+c)
+            next_pos2 = (my_pos[0]-r, my_pos[1]+c)
+            next_pos3 = (my_pos[0]+r, my_pos[1]+c)
+            next_pos4 = (my_pos[o]-r, my_pos[1]-c)
+            for i in 3:
+                if (check_valid_step(my_pos, next_pos, i)):
+                    actions.append(next_pos)
+                if (check_valid_step(my_pos, next_pos2, i)):
+                    actions.append(next_pos)
+                if (check_valid_step(my_pos, next_pos3, i)):
+                    actions.append(next_pos)
+                if (check_valid_step(my_pos, next_pos4, i)):
+                    actions.append(next_pos)
+        return actions
             
 
 
