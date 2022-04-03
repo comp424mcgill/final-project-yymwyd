@@ -39,7 +39,7 @@ class StudentAgent(Agent):
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
 
-        '''
+        
         #store all the paths into this array
         listOfPath = []
 
@@ -62,11 +62,13 @@ class StudentAgent(Agent):
     
     
     #1 simulation 
-    def stimulChild(chess_board, my_pose, adv_pos):
+    def simulChild(chess_board, my_pos, adv_pos):
 
         
         #a path that is found by 1 simulation counsisting of nodes, attributes updated along the way
         path = []
+
+        
 
 
     #backpropagation during each simulation
@@ -94,4 +96,3 @@ class StudentAgent(Agent):
     #calculate UCTs for the direct children and find the best one
 
     #expand the node by returning this child
-'''
