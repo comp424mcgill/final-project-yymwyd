@@ -1,23 +1,6 @@
 import numpy as np
 from copy import deepcopy
-from time import sleep, time
 
-import signal
-from contextlib import contextmanager
-
-#1 simulation
-@contextmanager
-def time_limit(seconds):
-    def signal_handler(signum, frame):
-        raise TimeoutException("Execution timed out!")
-
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(seconds)
-    try:
-        yield
-    finally:
-        signal.alarm(0)
-            
 def random_walk(my_pos, adv_pos,max_step, chess_board):
         """
         Randomly walk to the next position in the board.
@@ -112,9 +95,6 @@ def check_endgame(board_size,chess_board,p0_pos,p1_pos):
         return True, p0_score, p1_score
 
 
-        
-
-
 #declare the global variables
 self_turn = 0
 
@@ -127,8 +107,7 @@ p0_pos = [0,0]
 p1_pos = [1,1]
 
 def simulation_step(chess_board, my_pos, adv_pos):
-
-        cur_pos=np.asarray(my_pos)
+        
         moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
         opposites = {0: 2, 1: 3, 2: 0, 3: 1}
         board_size = chess_board[0].shape[0]
@@ -136,44 +115,32 @@ def simulation_step(chess_board, my_pos, adv_pos):
         global self_turn
         global p0_pos
         global p1_pos
+        global p0_step
+        global p1_step
+        
 
-        if not self_turn:
-                global p0_step
+        if not self_turn:               
                 cur_player_step = p0_step
-        else:
-                global p1_step
+                cur_pos=np.asarray(my_pos)
+        else:       
                 cur_player_step = p1_step
-
-        # Get allowed time in this step
-        if cur_player_step == 0:
-                allowed_time_seconds = 30
+                cur_pos=np.asarray(adv_pos)
+        
+        if not self_turn:
+                    p0_step += 1
         else:
-                allowed_time_seconds = 2
+                    p1_step += 1
 
-        with time_limit(allowed_time_seconds):
-                if not self_turn:
-                        p0_step += 1
-                else:
-                        p1_step += 1
+        next_pos, dir = random_walk(tuple(cur_pos), tuple(adv_pos),max_step,chess_board)
 
-                start_time = time()
-                next_pos, dir = random_walk(tuple(cur_pos), tuple(adv_pos),max_step,chess_board)
 
-                #update player time
-                if not self_turn:
-                        global p0_time
-                        p0_time += time() - start_time
-                else:
-                        global p1_time
-                        p1_time += time() - start_time
-
-                next_pos = np.asarray(next_pos, dtype=cur_pos.dtype)
+        next_pos = np.asarray(next_pos, dtype=cur_pos.dtype)
 
 
         if not self_turn:
-                        p0_pos = next_pos
+                    p0_pos = next_pos
         else:
-                        p1_pos = next_pos
+                    p1_pos = next_pos
 
                         
         # Set the barrier to True
@@ -191,12 +158,18 @@ def simulation_step(chess_board, my_pos, adv_pos):
         return chess_board, results
         #remember to return the updated chessboard
 
-def run_simulation():
+def run_simulation(chess_board, my_pos, adv_pos):
+    is_end, p0_score,p1_score = simulation_step(chess_board, my_pos, adv_pos)[1]
+    while not is_end:
+            is_end, p0_score, p1_score = simulation_step(chess_board, my_pos, adv_pos)[1]
+    if p0_score >p1_score:
+        return "p0 wins"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score)
+    elif p0_score < p1_score:
+        return "p1 wins"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score)
+    else:
+        return "it's a tie"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score)
         
-                
-
             
-
 if __name__ == "__main__":
         chess_board = np.zeros((4,4, 4), dtype=bool)
         chess_board[0, :, 0] = True
@@ -206,8 +179,8 @@ if __name__ == "__main__":
 
         my_pos = (2,3)
         adv_pos = (0,1)
-        print(chess_board)
-        print(simulation_step(chess_board, my_pos, adv_pos))
+        #print(chess_board)
+        print(run_simulation(chess_board, my_pos, adv_pos))
 
 
         
