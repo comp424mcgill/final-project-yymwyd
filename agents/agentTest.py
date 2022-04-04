@@ -1,11 +1,11 @@
 # Student agent: Add your own agent here
 #from agents.agent import Agent
 import numpy as np
-
+from node import *
 from agent import Agent
-import node
-#from store import register_agent
 import sys
+#from store import register_agent
+
 
 
 #@register_agent("my_agent")
@@ -162,14 +162,18 @@ class agentTest(Agent):
                 print("pos4",next_pos4)
                 for i in range(4):
                     if (self.check_valid_step(chess_board, my_pos, next_pos, adv_pos, i, step)):
-                        actions.append(next_pos)
+                        n1 = Node(next_pos, i, parent = my_pos)
+                        actions.append(n1)
                     if (self.check_valid_step(chess_board, my_pos, next_pos2, adv_pos,i,step)):
-                        actions.append(next_pos2)
+                        n2 = Node(next_pos2, i, parent=my_pos)
+                        actions.append(n2)
                     if (self.check_valid_step(chess_board, my_pos, next_pos3, adv_pos,i,step)):
-                        actions.append(next_pos3)
+                        n3 = Node(next_pos3, i, parent=my_pos)
+                        actions.append(n3)
                     if (self.check_valid_step(chess_board, my_pos, next_pos4, adv_pos,i,step)):
-                        actions.append(next_pos4)
-        print("actions are:\n", actions)
+                        n4 = Node(next_pos4, i, parent=my_pos)
+                        actions.append(n4)
+
         return actions
 
 
@@ -183,10 +187,13 @@ def main():
     sa = agentTest()
     my_pos = (2, 2)
     adv_pos = (0,1)
+    root = Node(my_pos, None, parent=None)
+    #change root Node with UCT
     # chess_board = World()
     children = sa.getActions(my_pos, adv_pos, 2, x)
+    
     for i in range(len(children)):
-        print(children[i])
+        print(children[i].my_pos, children[i].dir)
 
 if __name__ == "__main__":
     main()

@@ -8,7 +8,7 @@ class Node:
                 self.my_pos = my_pos
                 self.dir = dir
                 self.parent = parent
-                self.children = dict #(action:visited time)
+                self.children = dict #(action:UCT)
 
         #getter for  nodes
         def get_visits(self):
@@ -30,6 +30,8 @@ class Node:
         #add children
         def add_child(self, c):
                 self.children.append(c)
+
+
 
                 
                 
