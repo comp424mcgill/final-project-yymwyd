@@ -7,7 +7,7 @@ import node
 import sys
 
 
-#@register_agent("my_agent")
+#@register_agent("student_agent")
 class StudentAgent(Agent):
     """
     A dummy class for your implementation. Feel free to use this class to

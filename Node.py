@@ -16,6 +16,8 @@ class Node:
 
         def get_wins(self):
                 return self.num_success
+        def get_children(self):
+                return self.children
 
         #setter for nodes
         def set_visits(self, v):

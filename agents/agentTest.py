@@ -3,6 +3,7 @@
 import numpy as np
 from node import *
 from agent import Agent
+import math
 import sys
 #from store import register_agent
 
@@ -58,24 +59,13 @@ class agentTest(Agent):
         if (success):
             newWin = n.get_wins() + 1
             n.set_wins(newWin)
+            
 
     def backpropagation(lastExpand, success):
         while lastExpand.parent != None:
             updateNode(lastExpand, success)
             lastExpand = lastExpand.parent
 
-
-    #calculate all UCT from any direct action, return a list of UCTs(how to find this,
-    #by appending all UCTs into an array an find the node associated with the highest value? might need to break ties
-    #how to search the Node given their UCT score, do i need to put UCT as the node's attribute. even if I do this, how can I find the Node by having its UCT score?
-
-    def findAllUCT(listOfPath):
-
-    #find the best UCT
-    def findBestUCT(listOfUCTs):#idk how to implement this pls help
-
-    #find the best Node
-    def findBestNode(bestUCT):#same as the last question
 
 
 
@@ -87,8 +77,6 @@ class agentTest(Agent):
 
     #expand the node by returning this child
     '''
-
-
     def check_valid_step(self, chess_board, start_pos, end_pos, adv_pos, barrier_dir, step):
         """
         Check if the step the agent takes is valid (reachable and within max steps).
@@ -140,6 +128,7 @@ class agentTest(Agent):
 
         return is_reached
 
+    #get all actions under the root Node
     def getActions(self, my_pos, adv_pos, step, chess_board):
         #boardsize chess_board.boardsize
         x = 4
@@ -176,6 +165,41 @@ class agentTest(Agent):
 
         return actions
 
+    #set UCT score to the list of children actions Nodes
+    def setUCT(self, actions, rootNode):
+        rootChildren = dict()
+        for i in range(len(actions)):
+            valueA = actions[i].get_wins()/actions[i].get_visit()
+            numA = actions[i].get_visit*()
+            visitR = rootNode.get_visit()
+            uct = valueA + math.sqrt(2) * math.sqrt(math.log(visitR, np.e)/numA)
+            rootChildren[actions[i]] = uct
+        return rootChildren
+
+    #find the best node to expand
+    def findBestUCT(self, rootNode):
+        rootChildren = rootNode.get_children()
+        bestNode = None
+        bestUCT = 0
+        for key, value in rootChildren.items():
+            if value > bestUCT:
+                bestNode = key
+        return bestNode
+
+    def _select(self, node):
+        "Find an unexplored descendent of `node`"
+        path = []
+        while True:
+            path.append(node)
+            if node not in node.children or not node.get_children():
+                # node is either unexplored or terminal
+                return path
+            unexplored = node.children[node] - self.children.keys()
+            if unexplored:
+                n = unexplored.pop()
+                path.append(n)
+                return path
+            node = self._uct_select(node)  # descend a layer deeper
 
 def main():
     x = np.zeros((4, 4, 4), dtype=bool)
@@ -191,7 +215,7 @@ def main():
     #change root Node with UCT
     # chess_board = World()
     children = sa.getActions(my_pos, adv_pos, 2, x)
-    
+
     for i in range(len(children)):
         print(children[i].my_pos, children[i].dir)
 

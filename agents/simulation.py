@@ -6,6 +6,9 @@ import signal
 from contextlib import contextmanager
 
 #1 simulation
+from world import TimeoutException
+
+
 @contextmanager
 def time_limit(seconds):
     def signal_handler(signum, frame):
@@ -198,16 +201,16 @@ def run_simulation():
             
 
 if __name__ == "__main__":
-        chess_board = np.zeros((4,4, 4), dtype=bool)
-        chess_board[0, :, 0] = True
-        chess_board[:, 0, 3] = True
-        chess_board[-1, :, 2] = True
-        chess_board[:, -1, 1] = True
+    chess_board = np.zeros((4,4, 4), dtype=bool)
+    chess_board[0, :, 0] = True
+    chess_board[:, 0, 3] = True
+    chess_board[-1, :, 2] = True
+    chess_board[:, -1, 1] = True
 
-        my_pos = (2,3)
-        adv_pos = (0,1)
-        print(chess_board)
-        print(simulation_step(chess_board, my_pos, adv_pos))
+    my_pos = (2,3)
+    adv_pos = (0,1)
+    print(chess_board)
+    print(simulation_step(chess_board, my_pos, adv_pos))
 
 
         
