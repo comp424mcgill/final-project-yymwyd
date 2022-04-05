@@ -2,6 +2,7 @@
 #from agents.agent import Agent
 from agents.agent import Agent
 from world import *
+import copy
 #import node
 #from store import register_agent
 import sys
