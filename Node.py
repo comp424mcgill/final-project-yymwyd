@@ -17,6 +17,18 @@ class Node:
         def get_wins(self):
                 return self.num_success
 
+        def get_children(self):
+                return self.children
+
+        def get_pos(self):
+                return self.my_pos
+
+        def get_dir(self):
+                return self.dir
+
+        def get_parent(self):
+                return self.parent
+
         #setter for nodes
         def set_visits(self, v):
                 self.num_visited = v
