@@ -31,8 +31,8 @@ def get_args():
     parser.add_argument("--display_delay", type=float, default=0.4)
     parser.add_argument("--display_save", action="store_true", default=False)
     parser.add_argument("--display_save_path", type=str, default="plots/")
-    parser.add_argument("--autoplay", action="store_true", default=False)
-    parser.add_argument("--autoplay_runs", type=int, default=1000)
+    parser.add_argument("--autoplay", action="store_true", default=True)
+    parser.add_argument("--autoplay_runs", type=int, default=100)
     args = parser.parse_args()
     return args
 
@@ -108,7 +108,9 @@ class Simulator:
                 p0_score, p1_score, p0_time, p1_time = self.run(
                     swap_players=swap_players, board_size=board_size
                 )
+                
                 if swap_players:
+
                     p0_score, p1_score, p0_time, p1_time = (
                         p1_score,
                         p0_score,

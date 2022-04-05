@@ -130,19 +130,17 @@ def simulation_step(chess_board, my_pos, adv_pos):
                     p0_step += 1
         else:
                     p1_step += 1
-
+                    
+        #print("before random walk")
         next_pos, dir = random_walk(tuple(cur_pos), tuple(adv_pos),max_step,chess_board)
 
-
         next_pos = np.asarray(next_pos, dtype=cur_pos.dtype)
-
 
         if not self_turn:
                     p0_pos = next_pos
         else:
                     p1_pos = next_pos
-
-                        
+             
         # Set the barrier to True
         r, c = next_pos
         chess_board[r, c, dir] = True
@@ -155,32 +153,59 @@ def simulation_step(chess_board, my_pos, adv_pos):
 
         results = check_endgame(board_size,chess_board,p0_pos,p1_pos)
 
-        return chess_board, results
+        return results
         #remember to return the updated chessboard
 
 def run_simulation(chess_board, my_pos, adv_pos):
-    is_end, p0_score,p1_score = simulation_step(chess_board, my_pos, adv_pos)[1]
-    while not is_end:
-            is_end, p0_score, p1_score = simulation_step(chess_board, my_pos, adv_pos)[1]
-    if p0_score >p1_score:
-        return "p0 wins"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score)
-    elif p0_score < p1_score:
-        return "p1 wins"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score)
-    else:
-        return "it's a tie"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score)
+
+        is_end, p0_score,p1_score = simulation_step(chess_board, my_pos, adv_pos)
+        #print(chess_board)
+        while not is_end:
+                is_end, p0_score,p1_score = simulation_step(chess_board, my_pos, adv_pos)
+        '''        
+        if p0_score >p1_score:
+                #print("p0 wins"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score))
+        elif p0_score < p1_score:
+                #print( "p1 wins"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score))
+        else:
+                #print( "it's a tie"+" p0 score: "+ str(p0_score)+" p1 score: "+str(p1_score))
+                '''
+        return p0_score, p1_score
+#multiple simulations
+def m_simulate(chess_board, my_pos, adv_pos, max_step):
+        p1_win_count = 0
+        p2_win_count = 0
+        i =0
+        while (i != 3):
+                p0_score, p1_score = run_simulation(chess_board,my_pos, adv_pos)
+                i +=1
+                print(i)
+                
+                if p0_score > p1_score:
+                        p1_win_count += 1
+                elif p0_score < p1_score:
+                        p2_win_count += 1
+                else:  # Tie
+                        p1_win_count += 1
+                        p2_win_count += 1
+                        
+        return p1_win_count,i
+        
         
             
 if __name__ == "__main__":
-        chess_board = np.zeros((4,4, 4), dtype=bool)
+        chess_board = np.zeros((5,5, 4), dtype=bool)
         chess_board[0, :, 0] = True
         chess_board[:, 0, 3] = True
         chess_board[-1, :, 2] = True
         chess_board[:, -1, 1] = True
+        max_step = 2
 
         my_pos = (2,3)
         adv_pos = (0,1)
         #print(chess_board)
         print(run_simulation(chess_board, my_pos, adv_pos))
+        
 
 
         
