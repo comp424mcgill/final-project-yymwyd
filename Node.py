@@ -1,6 +1,6 @@
 class Node:
         #initiate Node 
-        def __init__(self, my_pos, dir, parent = None):
+        def __init__(self, my_pos, dir, parent):
                 #initialize node number of visited
                 self.num_visited = 0
                 #initialize node number of success
@@ -8,7 +8,7 @@ class Node:
                 self.my_pos = my_pos
                 self.dir = dir
                 self.parent = parent
-                self.children = dict #(action:UCT)
+                self.children = dict() #(action:UCT)
 
         #getter for  nodes
         def get_visits(self):
@@ -40,8 +40,8 @@ class Node:
                 self.parent = p
             
         #add children
-        def add_child(self, c):
-                self.children.append(c)
+        def set_children(self, c):
+                self.children = c
 
 
 
