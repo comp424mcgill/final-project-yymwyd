@@ -4,13 +4,13 @@ import numpy as np
 from Node import *
 from agent import Agent
 import math
+from copy import deepcopy
 import copy
 import sys
-#from store import register_agent
+from store import register_agent
 
 
-
-#@register_agent("my_agent")
+@register_agent("student_agent")
 class agentTest(Agent):
     """
     A dummy class for your implementation. Feel free to use this class to
@@ -44,17 +44,18 @@ class agentTest(Agent):
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
         root = Node(my_pos, None, None)
-        ejdNode = None
+        endNode = None
         bestNode = None
         while True:
             if not root.get_children():
                 if root.get_visits == 0:
-                    self.m_simulate(chess_board, root,adv_pos, max_step)
+                    self.m_simulate(chess_board, root,adv_pos)
                 else:
                     leafNode = self.select(root)
                     root = leafNode
                     endNode = self.expand(root, adv_pos, max_step, chess_board)
-                    if leafNode:
+
+                    if endNode:
                         break
 
             else:
@@ -68,6 +69,7 @@ class agentTest(Agent):
         dir = bestNode.get_dir()
 
         return my_pos, dir
+
     def check_valid_step(self, chess_board, start_pos, end_pos, adv_pos, barrier_dir, step):
         """
         Check if the step the agent takes is valid (reachable and within max steps).
@@ -184,10 +186,17 @@ class agentTest(Agent):
                 bestNode = key
         return bestNode
 
-    def select(self, rootNode):#start from the root node, select its children until leaf(uct can't decide)\
+    def select(self, rootNode, chess_board):#start from the root node, select its children until leaf(uct can't decide)\
+        moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
+        opposites = {0: 2, 1: 3, 2: 0, 3: 1}
         while rootNode.get_children():
             # descend a layer deeper
             rootNode = self.findBestUCT(rootNode)
+            dir = rootNode.get_dir()
+            r,c = rootNode.get_pos()
+            chess_board[r,c,dir] = True
+            move = moves[dir]
+            chess_board[r + move[0], c + move[1], opposites[dir]] = True
         return rootNode
 
     def expand(self, leafNode, adv_pos, step, chess_board): #add all children to the leaf node
@@ -196,7 +205,7 @@ class agentTest(Agent):
             return leafNode
         children = dict()
         for i in range(len(AllChildren)):
-            children[AllChildren[i]] = 0
+            children[AllChildren[i]] = math.inf
         leafNode.set_children(children)
 
     def updateNode(self, n, success):
@@ -212,7 +221,6 @@ class agentTest(Agent):
             self.updateNode(lastExpand, success)
             lastExpand = lastExpand.parent
         self.setUCT(lastExpand)
-        return
 
     def rollout(self, rootNode, adv_pos, step, chess_board):
         leafNode = self.select(rootNode)
@@ -221,17 +229,197 @@ class agentTest(Agent):
             self.m_simulate(chess_board, leafNode, adv_pos, step)
 
 
-    def run_simulation(self, chess_board, my_pos, adv_pos):
-        return True
-    def m_simulate(self, chess_board, leafNode, adv_pos, max_step):
+    def m_simulate(self, chess_board, leafNode, adv_pos):
         my_pos = leafNode.get_pos()
-        p1_win_count = 0
-        p2_win_count = 0
         i = 0
+        # declare the global variables
+
         while (i != 20):#check time
-            success = self.run_simulation(chess_board, my_pos, adv_pos)
+            tempC = deepcopy(chess_board)
+            self_turn = 0
+            # random initialize p0 and p1 position, remember to change it after expansion
+            p0_pos = [0, 0]
+            p1_pos = [1, 1]
+            success = self.run_simulation(tempC, my_pos, adv_pos)
             self.backpropagation(leafNode, success)
             i += 1
+        return leafNode
+
+    def random_walk(self, my_pos, adv_pos, max_step, chess_board):
+        """
+        Randomly walk to the next position in the board.
+        Parameters
+        ----------
+        my_pos : tuple
+            The position of the agent.
+        adv_pos : tuple
+            The position of the adversary.
+        """
+        moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
+
+        ori_pos = deepcopy(my_pos)
+        steps = np.random.randint(0, max_step + 1)
+        # Random Walk
+        for _ in range(steps):
+            r, c = my_pos
+            dir = np.random.randint(0, 4)
+            m_r, m_c = moves[dir]
+            my_pos = (r + m_r, c + m_c)
+
+
+            # Special Case enclosed by Adversary
+            k = 0
+            while chess_board[r, c, dir] or my_pos == adv_pos:
+                k += 1
+                if k > 300:
+                    break
+                dir = np.random.randint(0, 4)
+                m_r, m_c = moves[dir]
+                my_pos = (r + m_r, c + m_c)
+
+            if k > 300:
+                my_pos = ori_pos
+                break
+
+            # Put Barrier
+        dir = np.random.randint(0, 4)
+        r, c = my_pos
+        # print("random walk",my_pos,chess_board[r, c])
+        while chess_board[r, c, dir]:
+            dir = np.random.randint(0, 4)
+
+        return my_pos, dir
+
+    def check_endgame(self, board_size, chess_board, p0_pos, p1_pos):
+        moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
+
+        # Union-Find
+        father = dict()
+        for r in range(board_size):
+            for c in range(board_size):
+                father[(r, c)] = (r, c)
+
+        def find(pos):
+            if father[pos] != pos:
+                father[pos] = find(father[pos])
+            return father[pos]
+
+        def union(pos1, pos2):
+            father[pos1] = pos2
+
+        for r in range(board_size):
+            for c in range(board_size):
+                for dir, move in enumerate(
+                        moves[1:3]
+                ):  # Only check down and right
+                    if chess_board[r, c, dir + 1]:
+                        continue
+                    pos_a = find((r, c))
+                    pos_b = find((r + move[0], c + move[1]))
+                    if pos_a != pos_b:
+                        union(pos_a, pos_b)
+
+        for r in range(board_size):
+            for c in range(board_size):
+                find((r, c))
+        p0_r = find(tuple(p0_pos))
+        p1_r = find(tuple(p1_pos))
+        p0_score = list(father.values()).count(p0_r)
+        p1_score = list(father.values()).count(p1_r)
+        if p0_r == p1_r:
+            return False, p0_score, p1_score
+        player_win = None
+        win_blocks = -1
+        if p0_score > p1_score:
+            player_win = 0
+            win_blocks = p0_score
+        elif p0_score < p1_score:
+            player_win = 1
+            win_blocks = p1_score
+        else:
+            player_win = -1  # Tie
+        return True, p0_score, p1_score
+
+    def simulation_step(self, chess_board, my_pos, adv_pos):
+
+        moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
+        opposites = {0: 2, 1: 3, 2: 0, 3: 1}
+        board_size = chess_board[0].shape[0]
+        max_step = (board_size + 1) // 2
+        global self_turn
+        global p0_pos
+        global p1_pos
+
+        # adv is p0
+        p0_pos = deepcopy(adv_pos)
+        # my is p1
+        p1_pos = deepcopy(my_pos)
+
+        # if adv play
+        if not self_turn:
+            # cur_pos = adv and adv_pos = my
+            cur_pos = np.asarray(p0_pos)
+            adv_pos = p1_pos
+
+        else:
+            cur_pos = np.asarray(p1_pos)
+            adv_pos = p0_pos
+
+        next_pos, dir = self.random_walk(tuple(cur_pos), tuple(adv_pos), max_step, chess_board)
+        next_pos = np.asarray(next_pos, dtype=cur_pos.dtype)
+
+        # adv turn, next_pos is for adv
+        if not self_turn:
+            p0_pos = next_pos
+        # my turn, next_pos is for me
+        else:
+            p1_pos = next_pos
+
+        # Set the barrier to True
+        r, c = next_pos
+
+        print(next_pos, chess_board[r, c])
+        chess_board[r, c, dir] = True
+        move = moves[dir]
+        chess_board[r + move[0], c + move[1], opposites[dir]] = True
+        print(next_pos, chess_board[r, c])
+
+        # Change turn
+        self_turn = 1 - self_turn
+
+        results = self.check_endgame(board_size, chess_board, p0_pos, p1_pos)
+
+        return next_pos, results
+        # remember to return the updated chessboard
+
+    def run_simulation(self,chess_board, my_pos, adv_pos):
+        global p0_pos
+        global p1_pos
+
+        result = self.simulation_step(chess_board, my_pos, adv_pos)
+        is_end, p0_score, p1_score = result[1]
+
+        if not self_turn:
+            my_pos = result[0]
+        else:
+            adv_pos = result[0]
+
+        while not is_end:
+            result = self.simulation_step(chess_board, my_pos, adv_pos)
+            is_end, p0_score, p1_score = result[1]
+            if not self_turn:
+                my_pos = result[0]
+            else:
+                adv_pos = result[0]
+
+        if p0_score > p1_score:
+            print("p0 wins" + " p0 score: " + str(p0_score) + " p1 score: " + str(p1_score))
+        elif p0_score < p1_score:
+            print("p1 wins" + " p0 score: " + str(p0_score) + " p1 score: " + str(p1_score))
+        else:
+            print("it's a tie" + " p0 score: " + str(p0_score) + " p1 score: " + str(p1_score))
+
+        return p0_score, p1_score
 
 def main():
     #initialize chessboard
@@ -262,15 +450,19 @@ def main():
     '''
 
     #test for select
+    '''
     sa.select(root)
     print(root.get_pos())
+    '''
 
     #test for expand
+    '''
     sa.expand(root, adv_pos, step, chess_board)
     children = root.get_children()
     for key, value in children.items():
         print("in loop")
         print(key.get_pos(), key.get_dir(), value)
+    '''
 
     #test for backpropagation
     
