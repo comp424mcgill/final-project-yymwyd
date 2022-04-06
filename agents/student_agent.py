@@ -48,7 +48,8 @@ class StudentAgent(Agent):
         while True:
             if not root.get_children():
                 if root.get_visits == 0:
-                    self.m_simulate(chess_board, root, adv_pos)
+                    totalNum, numsuccess = self.m_simulate(chess_board, root, adv_pos)
+                    self.backpropagation(root, totalNum, numsuccess)
                     while root.get_parent() is not None:
                         root = root.get_parent()
 
@@ -236,6 +237,7 @@ class StudentAgent(Agent):
         my_pos = leafNode.get_pos()
         i = 0
         # declare the global variables
+        totalS = 0
 
         while (i != 20):  # check time
             tempC = deepcopy(chess_board)
@@ -244,9 +246,11 @@ class StudentAgent(Agent):
             p0_pos = [0, 0]
             p1_pos = [1, 1]
             success = self.run_simulation(tempC, my_pos, adv_pos, p0_pos, p1_pos, self_turn)
-            self.backpropagation(leafNode, success)
+            if success == 1:
+                totalS = totalS + 1
             i += 1
-        return leafNode
+
+        return i, totalS
 
     def random_walk(self, my_pos, adv_pos, max_step, chess_board):
         """
