@@ -1,7 +1,7 @@
 import numpy as np
 from copy import deepcopy
 import traceback
-from agents import *
+#from agents import *
 from ui import UIEngine
 from time import sleep, time
 import click
@@ -39,8 +39,8 @@ logger = logging.getLogger(__name__)
 class World:
     def __init__(
         self,
-        player_1="random_agent",
-        player_2="random_agent",
+        player_1="r_agent",
+        player_2="r_agent",
         board_size=None,
         display_ui=False,
         display_delay=2,

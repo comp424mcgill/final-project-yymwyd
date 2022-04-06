@@ -1,5 +1,6 @@
 # Student agent: Add your own agent here
 #from agents.agent import Agent
+<<<<<<< Updated upstream
 from agents.agent import Agent
 import copy
 #import node
@@ -8,6 +9,17 @@ import sys
 
 
 #@register_agent("student_agent")
+=======
+#from world import World, PLAYER_1_NAME, PLAYER_2_NAME
+import numpy as np
+from agent import Agent
+import node
+from store import register_agent
+import sys
+
+
+@register_agent("student_agent")
+>>>>>>> Stashed changes
 class StudentAgent(Agent):
     """
     A dummy class for your implementation. Feel free to use this class to
@@ -40,9 +52,16 @@ class StudentAgent(Agent):
 
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
+        return my_pos, dir
 
 
 
+<<<<<<< Updated upstream
+=======
+    #r+c = max_step
+            
+    '''
+>>>>>>> Stashed changes
 
     #backpropagation during each simulation
 
@@ -83,6 +102,7 @@ class StudentAgent(Agent):
     #calculate UCTs for the direct children and find the best one
 
     #expand the node by returning this child
+<<<<<<< Updated upstream
 '''
 
 
@@ -106,11 +126,88 @@ def getActions(self, my_pos, step):
             if (world.check_valid_step(my_pos, next_pos4, i)):
                 actions.append(next_pos)
     return actions
+=======
+    '''
+    def check_valid_step(self, chess_board, start_pos, end_pos, barrier_dir):
+        """
+        Check if the step the agent takes is valid (reachable and within max steps).
+        Parameters
+        ----------
+        start_pos : tuple
+            The start position of the agent.
+        end_pos : np.ndarray
+            The end position of the agent.
+        barrier_dir : int
+            The direction of the barrier.
+        """
+        # Endpoint already has barrier or is boarder
+        r, c = end_pos
+        if chess_board[r, c, barrier_dir]:
+            return False
+        if np.array_equal(start_pos, end_pos):
+            return True
+
+        # Get position of the adversary
+        adv_pos = chess_board.p0_pos if chess_board.turn else chess_board.p1_pos
+
+        # BFS
+        state_queue = [(start_pos, 0)]
+        visited = {tuple(start_pos)}
+        is_reached = False
+        while state_queue and not is_reached:
+            cur_pos, cur_step = state_queue.pop(0)
+            r, c = cur_pos
+            if cur_step == chess_board.max_step:
+                break
+            for dir, move in enumerate(chess_board.moves):
+                if chess_board[r, c, dir]:
+                    continue
+
+                next_pos = cur_pos + move
+                if np.array_equal(next_pos, adv_pos) or tuple(next_pos) in visited:
+                    continue
+                if np.array_equal(next_pos, end_pos):
+                    is_reached = True
+                    break
+
+                visited.add(tuple(next_pos))
+                state_queue.append((next_pos, cur_step + 1))
+
+        return is_reached
+
+    def getActions(self, my_pos, step, chess_board):
+        r = 0
+        c = 0
+        c = step - r
+        actions = []
+        for r in range(step):
+            next_pos = (my_pos[0] + r, my_pos[1] + c)
+            next_pos2 = (my_pos[0] - r, my_pos[1] + c)
+            next_pos3 = (my_pos[0] + r, my_pos[1] + c)
+            next_pos4 = (my_pos[0] - r, my_pos[1] - c)
+            for i in range(3):
+                if (self.check_valid_step(chess_board, my_pos, next_pos, i)):
+                    actions.append(next_pos)
+                if (self.check_valid_step(chess_board, my_pos, next_pos2, i)):
+                    actions.append(next_pos)
+                if (self.check_valid_step(chess_board, my_pos, next_pos3, i)):
+                    actions.append(next_pos)
+                if (self.check_valid_step(chess_board, my_pos, next_pos4, i)):
+                    actions.append(next_pos)
+        return actions
+>>>>>>> Stashed changes
 
 def main():
-    my_pos = (3,4)
+    x = np.zeros((4,4,4), dtype=bool)
+    x[0,:,0] = True
+    x[:, 0, 3] = True
+    x[-1, :,2] = True
+    x[:, -1,1] = True
 
-    children = getActions((3,4), 3)
+    sa = StudentAgent()
+    my_pos = (2,2)
+    #chess_board = World()
+    children = sa.getActions(my_pos, 2, x)
     for i in range(len(children)):
         print(children[i])
 
