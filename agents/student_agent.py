@@ -421,7 +421,7 @@ class StudentAgent(Agent):
         else:  # it's a tie
             return 0.5
 
-
+'''
 def main():
     # initialize chessboard
     x = np.zeros((4, 4, 4), dtype=bool)
@@ -438,35 +438,42 @@ def main():
     # max step is given
     step = 2
 
-    sa = agentTest()
+    sa = StudentAgent()
 
     # initialize root node
     root = Node(my_pos, None, None)
 
     # test for find all children
-    '''
+    
     children = sa.getActions(root, adv_pos, 2, x)
     for i in range(len(children)):
         print(children[i].my_pos, children[i].dir)
-    '''
+    
 
-    # test for select
-    '''
+    #test for select
     sa.select(root)
     print(root.get_pos())
-    '''
+    
 
     # test for expand
-    '''
     sa.expand(root, adv_pos, step, chess_board)
     children = root.get_children()
     for key, value in children.items():
         print("in loop")
         print(key.get_pos(), key.get_dir(), value)
-    '''
+    
 
     # test for backpropagation
-
+        if not cur_node.get_children():
+        print("cur node no children")
+        if cur_node.get_visits() == 0:
+            print("cur node no visit")
+            success = 1
+            sa.backpropagation(cur_node, success)
+            print("this node is:", cur_node.get_pos(), "is visited:", cur_node.get_visits(), "num of success", cur_node.get_wins())
+            print("this node's parent is", cur_node.get_parent().get_pos(), "is visited:", cur_node.get_parent().get_visits(),
+                  "num of success", cur_node.get_parent().get_wins())
+        
     # test for simulation
     self_turn = 0
     # random initialize p0 and p1 position, remember to change it after expansion
@@ -477,3 +484,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+'''

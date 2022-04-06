@@ -5,7 +5,7 @@ from store import register_agent
 
 # Important: you should register your agent with a name
 
-@register_agent("r_agent")
+@register_agent("random_agent")
 class RandomAgent(Agent):
     """
     Example of an agent which takes random decisions
