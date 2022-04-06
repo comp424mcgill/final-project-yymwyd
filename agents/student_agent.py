@@ -1,8 +1,8 @@
 # Student agent: Add your own agent here
-# from agents.agent import Agent
+from agents.agent import Agent
 import numpy as np
 from Node import *
-from agent import Agent
+#from agent import Agent
 import math
 from copy import deepcopy
 import copy
@@ -50,7 +50,7 @@ class StudentAgent(Agent):
                 if root.get_visits == 0:
                     self.m_simulate(chess_board, root, adv_pos)
                 else:
-                    leafNode = self.select(root)
+                    leafNode = self.select(root, chess_board)
                     root = leafNode
                     endNode = self.expand(root, adv_pos, max_step, chess_board)
 
@@ -62,7 +62,7 @@ class StudentAgent(Agent):
         while leafNode.parent:
             leafNode = leafNode.parent
         root = leafNode
-        bestNode = self.findbestUCT(root)
+        bestNode = self.findBestUCT(root)
 
         my_pos = bestNode.get_pos()
         dir = bestNode.get_dir()
@@ -131,31 +131,33 @@ class StudentAgent(Agent):
                 if 0 <= (my_pos[0] + r) <= x - 1 and 0 <= (my_pos[1] + i) <= x - 1:
                     next_pos = (my_pos[0] + r, my_pos[1] + i)
 
-                if next_pos not in uPos and not (next_pos == my_pos):
-                    uPos.append(next_pos)
+                    if next_pos not in uPos and not (next_pos == my_pos):
+                        uPos.append(next_pos)
 
                 if 0 <= (my_pos[0] - r) <= x - 1 and 0 <= (my_pos[1] + i) <= x - 1:
                     next_pos2 = (my_pos[0] - r, my_pos[1] + i)
 
-                if next_pos2 not in uPos and not (next_pos2 == my_pos):
-                    uPos.append(next_pos2)
+                    if next_pos2 not in uPos and not (next_pos2 == my_pos):
+                        uPos.append(next_pos2)
 
                 if 0 <= (my_pos[0] + r) <= x - 1 and 0 <= (my_pos[1] - i) <= x - 1:
                     next_pos3 = (my_pos[0] + r, my_pos[1] - i)
 
-                if next_pos3 not in uPos and not (next_pos3 == my_pos):
-                    uPos.append(next_pos3)
+                    if next_pos3 not in uPos and not (next_pos3 == my_pos):
+                        uPos.append(next_pos3)
 
                 if 0 <= (my_pos[0] - r) <= x - 1 and 0 <= (my_pos[1] - i) <= x - 1:
                     next_pos4 = (my_pos[0] - r, my_pos[1] - i)
-                if next_pos4 not in uPos and not (next_pos4 == my_pos):
-                    uPos.append(next_pos4)
-
-        for z in uPos:
-            for i in range(4):
-                if (self.check_valid_step(chess_board, my_pos, z, adv_pos, i, step)):
-                    n1 = Node(z, i, my_pos)
-                    actions.append(n1)
+                    if next_pos4 not in uPos and not (next_pos4 == my_pos):
+                        uPos.append(next_pos4)
+        if not uPos:
+            for z in uPos:
+                for i in range(4):
+                    if (self.check_valid_step(chess_board, my_pos, z, adv_pos, i, step)):
+                        n1 = Node(z, i, my_pos)
+                        actions.append(n1)
+        else:
+            actions = []
         return actions
 
     # set UCT score to the list of children actions Nodes
@@ -421,7 +423,7 @@ class StudentAgent(Agent):
         else:  # it's a tie
             return 0.5
 
-'''
+
 def main():
     # initialize chessboard
     x = np.zeros((4, 4, 4), dtype=bool)
@@ -461,11 +463,17 @@ def main():
     for key, value in children.items():
         print("in loop")
         print(key.get_pos(), key.get_dir(), value)
-    
+
+        # test for expand
+
+        sa.expand(root, adv_pos, step, chess_board)
+
+        cur_node = sa.findBestUCT(root)
+        print(cur_node.get_pos(), cur_node.get_dir(), cur_node.get_parent().get_pos())
 
     # test for backpropagation
         if not cur_node.get_children():
-        print("cur node no children")
+            print("cur node no children")
         if cur_node.get_visits() == 0:
             print("cur node no visit")
             success = 1
@@ -473,7 +481,8 @@ def main():
             print("this node is:", cur_node.get_pos(), "is visited:", cur_node.get_visits(), "num of success", cur_node.get_wins())
             print("this node's parent is", cur_node.get_parent().get_pos(), "is visited:", cur_node.get_parent().get_visits(),
                   "num of success", cur_node.get_parent().get_wins())
-        
+    #test for find best UCT and return the node
+    
     # test for simulation
     self_turn = 0
     # random initialize p0 and p1 position, remember to change it after expansion
@@ -484,4 +493,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
