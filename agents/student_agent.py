@@ -152,7 +152,7 @@ class StudentAgent(Agent):
             for z in uPos:
                 for i in range(4):
                     if (self.check_valid_step(chess_board, my_pos, z, adv_pos, i, step)):
-                        n1 = Node(z, i, my_pos)
+                        n1 = Node(z, i, rootNode)
                         actions.append(n1)
         else:
             actions = []
@@ -225,12 +225,14 @@ class StudentAgent(Agent):
     def updateNode(self, n, totalVisits, numWins):
         newVisit = n.get_visits() + totalVisits
         n.set_visits(newVisit)
-        n.set_wins(numWins)
+        newWins = n.get_wins() + numWins
+        n.set_wins(newWins)
 
     def backpropagation(self, lastExpand, totalVisits, numWins):
-        while lastExpand.parent is not None:
+        while lastExpand.get_parent() is not None:
             self.updateNode(lastExpand, totalVisits, numWins)
-            lastExpand = lastExpand.parent
+            print("1 node visited is:", lastExpand.get_visits(), "1 node wins is", lastExpand.get_wins())
+            lastExpand = lastExpand.get_parent()
         self.updateNode(lastExpand, totalVisits, numWins)
         return lastExpand
 
@@ -520,7 +522,6 @@ def main():
         totalVisits, numWins = sa.m_simulate(chess_board,cur_node, adv_pos)
         
         #5. backpropagation of the success rate and to see whether the root node is returned
-        print(type(cur_node))
         returned_node = sa.backpropagation(cur_node, totalVisits, numWins)
         print("the returned node is:", returned_node.get_pos(), returned_node.get_dir(),
               "its total visits is:", returned_node.get_visits(), "its total wins is:", returned_node.get_wins())
