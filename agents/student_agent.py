@@ -9,7 +9,6 @@ import copy
 import sys
 from store import register_agent
 
-
 @register_agent("student_agent")
 class agentTest(Agent):
     """
