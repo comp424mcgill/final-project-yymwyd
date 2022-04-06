@@ -41,38 +41,8 @@ class StudentAgent(Agent):
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
 
-        '''
-        #store all the paths into this array
-        listOfPath = []
-
-        #generate all simulations
-        while time + space resources are left:
-            #returns a path
-            Path = stimulChild(chess_board, my_pos, adv_pos)
-            listOfPath.append(Path)
-
-        #rturn an array of UCTs, number of each direct action 
-        nodeUCT = findAllUCT(listOfPath)
-
-        bestNode = findBestNode(nodeUCT)
-
-        return bestNode.my_pos, bestNode.dir
-        '''
 
 
-
-    
-    '''
-    #1 simulation 
-    def simulChild(chess_board, my_pose, adv_pos):
-        
-        #a path that is found by 1 simulation counsisting of nodes
-        path = []
-    '''
-
-    #r+c = max_step
-            
-'''
 
     #backpropagation during each simulation
 
