@@ -155,20 +155,30 @@ class agentTest(Agent):
         for z in uPos:
             for i in range(4):
                 if (self.check_valid_step(chess_board, my_pos, z, adv_pos, i, step)):
-                    n1 = Node(z, i, my_pos)
+                    n1 = Node(z, i, rootNode)
                     actions.append(n1)
         return actions
 
     #set UCT score to the list of children actions Nodes
     def setUCT(self, node):
         children = node.get_children()
-        actions = children.keys()
+        actions = list(children.keys())
         for i in range(len(actions)):
-            valueA = actions[i].get_wins()/actions[i].get_visit()
-            numA = actions[i].get_visit*()
-            visitR = node.get_visit()
-            uct = valueA + math.sqrt(2) * math.sqrt(math.log(visitR, np.e)/numA)
-            children[actions[i]] = uct
+            if(actions[i].get_visits() == 0):
+                valueA = math.inf
+                uct = math.inf
+                children[actions[i]] = uct
+                break
+            else:
+                valueA = np.float64(actions[i].get_wins())/actions[i].get_visits()
+                numA = actions[i].get_visits()
+            visitR = node.get_visits()
+            if(visitR == 0):
+                uct = math.inf
+                children[actions[i]] = uct
+            else:
+                uct = valueA + np.float64(math.sqrt(2) * math.sqrt(math.log(visitR, np.e))/numA)
+                children[actions[i]] = uct
         return children
 
     #find the best node to expand
@@ -211,16 +221,21 @@ class agentTest(Agent):
     def updateNode(self, n, success):
         newVisit = n.get_visits() + 1
         n.set_visits(newVisit)
-        if (success):
+        if (success == 1):
             newWin = n.get_wins() + 1
+            n.set_wins(newWin)
+        elif (success == 0.5):
+            newWin = n.get_wins() + 0.5
             n.set_wins(newWin)
 
 
     def backpropagation(self, lastExpand, success):
+        self.updateNode(lastExpand, success)
         while lastExpand.parent != None:
-            self.updateNode(lastExpand, success)
+            self.updateNode(lastExpand.parent, success)
             lastExpand = lastExpand.parent
-        self.setUCT(lastExpand)
+        if lastExpand.get_children():
+            self.setUCT(lastExpand)
 
     def rollout(self, rootNode, adv_pos, step, chess_board):
         leafNode = self.select(rootNode)
@@ -450,22 +465,41 @@ def main():
     '''
 
     #test for select
-    '''
-    sa.select(root)
+    y = deepcopy(x)
+    sa.select(root,y)
     print(root.get_pos())
-    '''
 
-    #test for expand
-    '''
-    sa.expand(root, adv_pos, step, chess_board)
-    children = root.get_children()
-    for key, value in children.items():
-        print("in loop")
-        print(key.get_pos(), key.get_dir(), value)
-    '''
 
     #test for backpropagation
-    
+    success = 0
+    sa.backpropagation(root, success)
+    print("it is visited:", root.get_visits(), "num of success", root.get_wins())
+
+
+    #test for expand
+
+    sa.expand(root, adv_pos, step, chess_board)
+
+    cur_node = sa.findBestUCT(root)
+    print(cur_node.get_pos(), cur_node.get_dir(), cur_node.get_parent().get_pos())
+
+    #test for backpropagation for level 2
+    if not cur_node.get_children():
+        print("cur node no children")
+        if cur_node.get_visits() == 0:
+            print("cur node no visit")
+            success = 1
+            sa.backpropagation(cur_node, success)
+            print("this node is:", cur_node.get_pos(), "is visited:", cur_node.get_visits(), "num of success", cur_node.get_wins())
+            print("this node's parent is", cur_node.get_parent().get_pos(), "is visited:", cur_node.get_parent().get_visits(),
+                  "num of success", cur_node.get_parent().get_wins())
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     main()
