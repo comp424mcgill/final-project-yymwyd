@@ -169,7 +169,7 @@ def simulation_step(chess_board, my_pos, adv_pos):
 
         results = check_endgame(board_size,chess_board,p0_pos,p1_pos)
 
-        return next_pos,results
+        return next_pos,results#,self_turn
         #remember to return the updated chessboard
 
 def run_simulation(chess_board, my_pos, adv_pos):
@@ -178,6 +178,7 @@ def run_simulation(chess_board, my_pos, adv_pos):
         
         result = simulation_step(chess_board, my_pos, adv_pos)
         is_end, p0_score,p1_score = result[1]
+        #self_turn = result[2]
         
         if not self_turn:
                     my_pos = result[0]
