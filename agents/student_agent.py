@@ -49,7 +49,7 @@ class StudentAgent(Agent):
             if not root.get_children():
                 if root.get_visits == 0:
                     totalNum, numsuccess = self.m_simulate(chess_board, root, adv_pos)
-                    self.backpropagation(root, totalNum, numsuccess)
+                    root = self.backpropagation(root, totalNum, numsuccess)
                     while root.get_parent() is not None:
                         root = root.get_parent()
 
@@ -63,7 +63,7 @@ class StudentAgent(Agent):
 
             else:
                 root = self.findBestUCT(root)
-        while endNode.parent:
+        while endNode.parent is not None:
             endNode = endNode.parent
         root = endNode
         bestNode = self.findBestUCT(root)
@@ -122,39 +122,33 @@ class StudentAgent(Agent):
     # get all actions under the root Node
     def getActions(self, rootNode, adv_pos, step, chess_board):
         # boardsize chess_board.boardsize
-        x = 4
-        y = 4
+        x = chess_board[0].shape[0]
         my_pos = rootNode.get_pos()
-        r = 0
         actions = []
         uPos = []
         for r in range(step + 1):
             c = step - r
             for i in range(c + 1):  # 3 is the size of the chessboard
-
                 if 0 <= (my_pos[0] + r) <= x - 1 and 0 <= (my_pos[1] + i) <= x - 1:
                     next_pos = (my_pos[0] + r, my_pos[1] + i)
-
-                    if next_pos not in uPos and not (next_pos == my_pos):
+                    if next_pos not in uPos:
                         uPos.append(next_pos)
 
                 if 0 <= (my_pos[0] - r) <= x - 1 and 0 <= (my_pos[1] + i) <= x - 1:
                     next_pos2 = (my_pos[0] - r, my_pos[1] + i)
-
-                    if next_pos2 not in uPos and not (next_pos2 == my_pos):
+                    if next_pos2 not in uPos:
                         uPos.append(next_pos2)
 
                 if 0 <= (my_pos[0] + r) <= x - 1 and 0 <= (my_pos[1] - i) <= x - 1:
                     next_pos3 = (my_pos[0] + r, my_pos[1] - i)
-
-                    if next_pos3 not in uPos and not (next_pos3 == my_pos):
+                    if next_pos3 not in uPos:
                         uPos.append(next_pos3)
 
                 if 0 <= (my_pos[0] - r) <= x - 1 and 0 <= (my_pos[1] - i) <= x - 1:
                     next_pos4 = (my_pos[0] - r, my_pos[1] - i)
-                    if next_pos4 not in uPos and not (next_pos4 == my_pos):
+                    if next_pos4 not in uPos:
                         uPos.append(next_pos4)
-        if not uPos:
+        if len(uPos) != 0:
             for z in uPos:
                 for i in range(4):
                     if (self.check_valid_step(chess_board, my_pos, z, adv_pos, i, step)):
@@ -165,15 +159,26 @@ class StudentAgent(Agent):
         return actions
 
     # set UCT score to the list of children actions Nodes
-    def setUCT(self, node):
+    def calculateUCT(self, node):
         children = node.get_children()
-        actions = children.keys()
+        actions = list(children.keys())
         for i in range(len(actions)):
-            valueA = actions[i].get_wins() / actions[i].get_visit()
-            numA = actions[i].get_visit * ()
-            visitR = node.get_visit()
-            uct = valueA + math.sqrt(2) * math.sqrt(math.log(visitR, np.e) / numA)
-            children[actions[i]] = uct
+            if (actions[i].get_visits() == 0):
+                valueA = math.inf
+                uct = math.inf
+                children[actions[i]] = uct
+                break
+            else:
+                valueA = np.float64(actions[i].get_wins()) / actions[i].get_visits()
+                numA = actions[i].get_visits()
+            visitR = node.get_visits()
+            if (visitR == 0):
+                uct = math.inf
+                children[actions[i]] = uct
+            else:
+                uct = valueA + np.float64(math.sqrt(2) * math.sqrt(math.log(visitR, np.e)) / numA)
+                children[actions[i]] = uct
+        return children
         return children
 
     # find the best node to expand
@@ -182,17 +187,19 @@ class StudentAgent(Agent):
         rootChildren = rootNode.get_children()
         bestNode = None
         bestUCT = 0
-        # for all children of this node, return the ones that either has the infinite UCT
-        for key, value in rootChildren.items():
+        #calculate UCTs for all children of this node
+        self.calculateUCT(rootNode)
+        #iterate through all children of this node
+        for key, value in rootChildren:
             if value == math.inf:
                 return key
-            # or the largest one
-            elif value > bestUCT:
+            if value > bestUCT:
+                bestUCT = value
                 bestNode = key
+
         return bestNode
 
-    def select(self, rootNode,
-               chess_board):  # start from the root node, select its children until leaf(uct can't decide)\
+    def select(self, rootNode, chess_board):  # start from the root node, select its children until leaf(uct can't decide)\
         moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
         opposites = {0: 2, 1: 3, 2: 0, 3: 1}
         while rootNode.get_children():
@@ -214,18 +221,17 @@ class StudentAgent(Agent):
             children[AllChildren[i]] = math.inf
         leafNode.set_children(children)
 
-    def updateNode(self, n, success):
-        newVisit = n.get_visits() + 1
+    def updateNode(self, n, totalVisits, numWins):
+        newVisit = n.get_visits() + totalVisits
         n.set_visits(newVisit)
-        if (success):
-            newWin = n.get_wins() + 1
-            n.set_wins(newWin)
+        n.set_wins(numWins)
 
-    def backpropagation(self, lastExpand, success):
-        while lastExpand.parent != None:
-            self.updateNode(lastExpand, success)
+    def backpropagation(self, lastExpand, totalVisits, numWins):
+        while lastExpand.parent is not None:
+            self.updateNode(lastExpand, totalVisits, numWins)
             lastExpand = lastExpand.parent
-        self.setUCT(lastExpand)
+        self.updateNode(lastExpand, totalVisits, numWins)
+        return lastExpand
 
     def rollout(self, rootNode, adv_pos, step, chess_board):
         leafNode = self.select(rootNode)
@@ -375,8 +381,7 @@ class StudentAgent(Agent):
         next_pos = np.asarray(next_pos, dtype=cur_pos.dtype)
 
         # adv turn, next_pos is for adv
-        print("p0: ", p0_pos)
-        print("p1 ", p1_pos)
+
         if not self_turn:
             p0_pos = next_pos
         # my turn, next_pos is for me
@@ -385,13 +390,11 @@ class StudentAgent(Agent):
 
         # Set the barrier to True
         r, c = next_pos
-        print("p0: ", p0_pos)
-        print("p1 ", p1_pos)
-        print(next_pos, chess_board[r, c])
+
+
         chess_board[r, c, dir] = True
         move = moves[dir]
         chess_board[r + move[0], c + move[1], opposites[dir]] = True
-        print(next_pos, chess_board[r, c])
 
         # Change turn
         self_turn = 1 - self_turn
@@ -491,31 +494,46 @@ def main():
     #test for the game logic with find best UCT
 
     #1. the root is not visited and not simulated before
-    sa.m_simulate(chess_board, root, adv_pos)
+    totalvisits, numwins = sa.m_simulate(chess_board, root, adv_pos)
+    returned_node = sa.backpropagation(root, totalvisits, numwins)
+    print(returned_node.get_pos())
+    print("node is visited:", root.get_visits(),"node wins:", root.get_wins())
 
+    '''
     #2. the root is simulated and visited, but is the leaf node, so expand the game tree
     sa.select(root,chess_board)
     sa.expand(root, adv_pos, step, chess_board)
+    children = sa.getActions(root, adv_pos, step, chess_board)
+    print(children)
+    for child in children:
+        print(child.get_pos())
 
     #3. the root is no longer a leaf node, find the best uct among its children
+    print(root.get_pos())
+
     cur_node = sa.findBestUCT(root)
-    print(cur_node.get_pos(), cur_node.get_dir(), cur_node.get_parent().get_pos())
+    #print(cur_node.get_pos(), cur_node.get_dir(), cur_node.get_parent().get_pos())
 
     #4. move to the next layer, if the currnet node has not been visited, simulate
     if not cur_node.get_children():
         print("cur node no children")
     if cur_node.get_visits() == 0:
-        '''
+
         print("cur node no visit")
         success = sa.run_simulation(x, my_pos, adv_pos, p0_pos, p1_pos, self_turn)
         sa.backpropagation(cur_node, success)
         print("this node is:", cur_node.get_pos(), "is visited:", cur_node.get_visits(), "num of success", cur_node.get_wins())
         print("this node's parent is", cur_node.get_parent().get_pos(), "is visited:", cur_node.get_parent().get_visits(),
                   "num of success", cur_node.get_parent().get_wins())
-        '''
-        sa.m_simulate(chess_board,cur_node, adv_pos)
-    #5. need to change backP algo now!
 
+        totalVisits, numWins = sa.m_simulate(chess_board,cur_node, adv_pos)
+        
+        #5. backpropagation of the success rate and to see whether the root node is returned
+        returned_node = sa.backpropagation(cur_node, totalVisits, numWins)
+        print("the returned node is:", returned_node.get_pos(), returned_node.get_dir(),
+              "its total visits is:", returned_node.get_visits(), "its total wins is:", returned_node.get_wins())
+
+        
     #5. the current node is now visited, but since it is a leaf node, it need to be expanded
     sa.select(root, chess_board)
     sa.expand(root, adv_pos, step, chess_board)
@@ -525,7 +543,7 @@ def main():
         cur_node = cur_node.get_parent()
     best_node = sa.findBestUCT(cur_node)
     print("the root's best UCT is ")
-
+    '''
 
 if __name__ == "__main__":
     main()
