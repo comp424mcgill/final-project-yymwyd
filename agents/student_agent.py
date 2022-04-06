@@ -11,14 +11,14 @@ from store import register_agent
 
 
 @register_agent("student_agent")
-class agentTest(Agent):
+class StudentAgent(Agent):
     """
     A dummy class for your implementation. Feel free to use this class to
     add any helper functionalities needed for your agent.
     """
 
     def __init__(self):
-        super(agentTest, self).__init__()
+        super(StudentAgent, self).__init__()
         self.name = "testAgent"
         self.dir_map = {
             "u": 0,
