@@ -184,19 +184,20 @@ class StudentAgent(Agent):
     # find the best node to expand
     def findBestUCT(self, rootNode):
         # find all children of this current node
+        print("in function")
         rootChildren = rootNode.get_children()
         bestNode = None
         bestUCT = 0
         #calculate UCTs for all children of this node
         self.calculateUCT(rootNode)
         #iterate through all children of this node
-        for key, value in rootChildren:
+        for key, value in rootChildren.items():
             if value == math.inf:
                 return key
             if value > bestUCT:
                 bestUCT = value
                 bestNode = key
-
+        print("the best uct score is:", bestUCT)
         return bestNode
 
     def select(self, rootNode, chess_board):  # start from the root node, select its children until leaf(uct can't decide)\
@@ -496,44 +497,35 @@ def main():
     #1. the root is not visited and not simulated before
     totalvisits, numwins = sa.m_simulate(chess_board, root, adv_pos)
     returned_node = sa.backpropagation(root, totalvisits, numwins)
-    print(returned_node.get_pos())
-    print("node is visited:", root.get_visits(),"node wins:", root.get_wins())
+    print("root node is:", root.get_pos(), "returned node is:", returned_node.get_pos())
+    print("returned node is visited:", returned_node.get_visits(),"returned node wins:", returned_node.get_wins())
 
-    '''
+
     #2. the root is simulated and visited, but is the leaf node, so expand the game tree
     sa.select(root,chess_board)
     sa.expand(root, adv_pos, step, chess_board)
     children = sa.getActions(root, adv_pos, step, chess_board)
-    print(children)
-    for child in children:
-        print(child.get_pos())
+    #for child in children:
+        #print(child.get_pos())
+
 
     #3. the root is no longer a leaf node, find the best uct among its children
-    print(root.get_pos())
-
     cur_node = sa.findBestUCT(root)
-    #print(cur_node.get_pos(), cur_node.get_dir(), cur_node.get_parent().get_pos())
+    print("root node is:", root.get_pos(), root.get_dir(),"current node is:", cur_node.get_pos(), cur_node.get_dir())
 
-    #4. move to the next layer, if the currnet node has not been visited, simulate
+    #4. move to the next layer, if the current node has not been visited, simulate
     if not cur_node.get_children():
         print("cur node no children")
     if cur_node.get_visits() == 0:
-
-        print("cur node no visit")
-        success = sa.run_simulation(x, my_pos, adv_pos, p0_pos, p1_pos, self_turn)
-        sa.backpropagation(cur_node, success)
-        print("this node is:", cur_node.get_pos(), "is visited:", cur_node.get_visits(), "num of success", cur_node.get_wins())
-        print("this node's parent is", cur_node.get_parent().get_pos(), "is visited:", cur_node.get_parent().get_visits(),
-                  "num of success", cur_node.get_parent().get_wins())
-
         totalVisits, numWins = sa.m_simulate(chess_board,cur_node, adv_pos)
         
         #5. backpropagation of the success rate and to see whether the root node is returned
+        print(type(cur_node))
         returned_node = sa.backpropagation(cur_node, totalVisits, numWins)
         print("the returned node is:", returned_node.get_pos(), returned_node.get_dir(),
               "its total visits is:", returned_node.get_visits(), "its total wins is:", returned_node.get_wins())
 
-        
+    '''
     #5. the current node is now visited, but since it is a leaf node, it need to be expanded
     sa.select(root, chess_board)
     sa.expand(root, adv_pos, step, chess_board)
