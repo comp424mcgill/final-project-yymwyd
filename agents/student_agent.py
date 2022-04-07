@@ -43,10 +43,12 @@ class StudentAgent(Agent):
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
         print("adv_pos is", adv_pos)
+        print("my_pos is", my_pos)
         root = Node(my_pos, None, None)
         endNode = None
         bestNode = None
         tempch = deepcopy(chess_board)
+        original_c = deepcopy(chess_board)
         while True:
             #if the node is a leaf node,
             if len(root.get_children()) == 0:
@@ -55,19 +57,19 @@ class StudentAgent(Agent):
                 if root.get_visits() == 0:
                     #print("root is not visited")
                     #simulate and back propagate
-                    print("the node being simulated", root.get_pos(), root.get_dir())
-                    totalNum, numsuccess = self.m_simulate(chess_board, root, adv_pos)
-                    print("total num is:", totalNum, "num success is:", numsuccess)
+                    #print("the node being simulated", root.get_pos(), root.get_dir())
+                    totalNum, numsuccess = self.m_simulate(original_c, root, adv_pos)
+                    #print("total num is:", totalNum, "num success is:", numsuccess)
                     #now the node is the root
                     root = self.backpropagation(root, totalNum, numsuccess)
-                    print("after bp", root.get_pos(), root.get_dir())
+                    #print("after bp", root.get_pos(), root.get_dir())
                     #print("root num visited is,", root.get_visits(), "num wins is", root.get_wins())
                     while root.get_parent() is not None:
                         root = root.get_parent()
                 #if the node is visited, but has no children, expand it
                 else:
-                    print("the root node to be expanded", root.get_pos(), root.get_dir())
-                    endNode = self.expand(root, adv_pos, max_step, chess_board)
+                    print("the node to be expanded", root.get_pos(), root.get_dir())
+                    endNode = self.expand(root, adv_pos, max_step, original_c)
 
                     # if can't find more children return the leafNode
                     if endNode is not None:
@@ -75,11 +77,10 @@ class StudentAgent(Agent):
 
             #if the node has children, find the leafNode which does not have children
             else:
-                chess_board = tempch
-                root = self.select(root, chess_board)
-                print("leafNode", root.get_pos(), root.get_dir())
-                print("updated chess board by selection", chess_board)
-                print("the leaf node selected", root.get_pos(), root.get_dir())
+                original_c = deepcopy(tempch)
+                root = self.select(root, original_c)
+                #print("updated chess board by selection", original_c)
+                #print("the leaf node selected", root.get_pos(), root.get_dir())
         while endNode.parent is not None:
             endNode = endNode.parent
         root = endNode
@@ -110,11 +111,8 @@ class StudentAgent(Agent):
         r, c = end_pos
         if chess_board[r, c, barrier_dir]:
             return False
-        else:
-            return True
         if np.array_equal(start_pos, end_pos):
             return True
-
         # BFS
         state_queue = [(start_pos, 0)]
         visited = {tuple(start_pos)}
@@ -169,6 +167,27 @@ class StudentAgent(Agent):
                     next_pos4 = (my_pos[0] - r, my_pos[1] - i)
                     if next_pos4 not in uPos:
                         uPos.append(next_pos4)
+            if(c == 0):
+                if 0 <= (my_pos[0] + r) <= x - 1 and 0 <= (my_pos[1] + c) <= x - 1:
+                    next_pos = (my_pos[0] + r, my_pos[1] + i)
+                    if next_pos not in uPos:
+                        uPos.append(next_pos)
+
+                if 0 <= (my_pos[0] - r) <= x - 1 and 0 <= (my_pos[1] + c) <= x - 1:
+                    next_pos2 = (my_pos[0] - r, my_pos[1] + i)
+                    if next_pos2 not in uPos:
+                        uPos.append(next_pos2)
+
+                if 0 <= (my_pos[0] + r) <= x - 1 and 0 <= (my_pos[1] - c) <= x - 1:
+                    next_pos3 = (my_pos[0] + r, my_pos[1] - i)
+                    if next_pos3 not in uPos:
+                        uPos.append(next_pos3)
+
+                if 0 <= (my_pos[0] - r) <= x - 1 and 0 <= (my_pos[1] - c) <= x - 1:
+                    next_pos4 = (my_pos[0] - r, my_pos[1] - i)
+                    if next_pos4 not in uPos:
+                        uPos.append(next_pos4)
+
 
         if len(uPos) != 0:
             for z in uPos:
@@ -195,14 +214,14 @@ class StudentAgent(Agent):
                 children[actions[i]] = uct
                 break
             else:
-                valueA = np.float64(actions[i].get_wins()) / actions[i].get_visits()
+                valueA = actions[i].get_wins() / actions[i].get_visits()
                 numA = actions[i].get_visits()
             visitR = node.get_visits()
             if (visitR == 0):
                 uct = math.inf
                 children[actions[i]] = uct
             else:
-                uct = valueA + np.float64(math.sqrt(2) * math.sqrt(math.log(visitR, np.e)) / numA)
+                uct = valueA + math.sqrt(2) * math.sqrt(math.log(visitR, np.e) / numA)
                 children[actions[i]] = uct
         return children
 
@@ -216,13 +235,16 @@ class StudentAgent(Agent):
         self.calculateUCT(rootNode)
         #iterate through all children of this node
         for key, value in rootChildren.items():
+            #print("children, uct value", key.get_pos(), key.get_dir(), value)
             if value == math.inf:
                 #print("best uct is infinite")
                 return key
             elif value > bestUCT:
+
                 bestUCT = value
                 bestNode = key
-        print("best uct is", bestUCT)
+        #print("bestNode is", bestNode.get_pos(), bestNode.get_dir())
+        #print("best uct is", bestUCT)
         return bestNode
 
     def select(self, rootNode, chess_board):  # start from the root node, select its children until leaf(uct can't decide)\
@@ -247,8 +269,6 @@ class StudentAgent(Agent):
         r2, c2 = rootNode.get_pos()
 
         if(dir2 is not None):
-            print("the leaf node", r2, c2, dir2)
-            print("the chess board is updated", dir2)
             chess_board[r2, c2, dir2] = True
             move = moves[dir2]
             chess_board[r2 + move[0], c2 + move[1], opposites[dir2]] = True
@@ -284,20 +304,21 @@ class StudentAgent(Agent):
         i = 0
         # declare the global variables
         totalS = 0
-        print("chessboard before each simulation", chess_board)
-        while (i != 1):  # check time,
+        while (i != 5):  # check time,
             tempC = deepcopy(chess_board)
             self_turn = 1
             # random initialize p0 and p1 position, remember to change it after expansion
+            #print("chessboard before each simulation should be equal to selected chessboard", chess_board)
             success = self.run_simulation(tempC, my_pos, adv_pos, self_turn)
             if success == 1:
                 totalS = totalS + 1
             i += 1
 
+
         return i, totalS
 
     def random_walk(self, my_pos, adv_pos, max_step, chess_board):
-        print("take random walk")
+        #print("take random walk")
         """
         Randomly walk to the next position in the board.
         Parameters
@@ -327,7 +348,6 @@ class StudentAgent(Agent):
                 dir = np.random.randint(0, 4)
                 m_r, m_c = moves[dir]
                 my_pos = (r + m_r, c + m_c)
-                print("in the random walk while loop")
 
             if k > 300:
                 my_pos = ori_pos
@@ -336,15 +356,12 @@ class StudentAgent(Agent):
             # Put Barrier
         dir = np.random.randint(0, 4)
         r, c = my_pos
-        print("random walk",my_pos,chess_board[r, c])
+        #print("random walk",my_pos,chess_board[r, c])
 
         x = 0
         while chess_board[r, c, dir]:
             dir = np.random.randint(0, 4)
             x = x+1
-            if(x>3):
-                print("cant get out:((((")
-                break
 
         return my_pos, dir
 
@@ -399,6 +416,7 @@ class StudentAgent(Agent):
         return True, p0_score, p1_score
 
     def simulation_step(self, chess_board, my_pos, adv_pos, self_turn):
+        #print("chess_board before updated", chess_board)
 
 
         moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
@@ -435,16 +453,18 @@ class StudentAgent(Agent):
             p1_pos = next_pos
 
         # Set the barrier to True
+
         r, c = next_pos
-
-
         chess_board[r, c, dir] = True
         move = moves[dir]
         chess_board[r + move[0], c + move[1], opposites[dir]] = True
+        #print("each simulation step chessboard", chess_board)
 
         # Change turn
         self_turn = 1 - self_turn
 
+        #print("before check_endgame should be all true", chess_board[r,c])
+        #print("my position is", next_pos)
         results = self.check_endgame(board_size, chess_board, p0_pos, p1_pos)
 
         return next_pos, results, self_turn
@@ -465,7 +485,7 @@ class StudentAgent(Agent):
             adv_pos = result[0]
 
         while not is_end:
-            print("game not terminate")
+            #print("game not terminate")
             result = self.simulation_step(chess_board, my_pos, adv_pos,self_turn)
             is_end, p0_score, p1_score = result[1]
             self_turn = result[2]
@@ -474,7 +494,7 @@ class StudentAgent(Agent):
             else:
                 adv_pos = result[0]
 
-        print("game terminates")
+        #print("game terminates")
 
         if p0_score > p1_score:  # adversary wins
             return -1
