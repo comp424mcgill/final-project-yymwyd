@@ -181,7 +181,6 @@ class StudentAgent(Agent):
     def calculateUCT(self, node):
         children = node.get_children()
         actions = list(children.keys())
-        ucts = list(children.values())
 
         for i in range(len(actions)):
             if (actions[i].get_visits() == 0):
@@ -190,7 +189,6 @@ class StudentAgent(Agent):
                 children[actions[i]] = uct
                 break
             else:
-                print("visits are updated")
                 valueA = np.float64(actions[i].get_wins()) / actions[i].get_visits()
                 numA = actions[i].get_visits()
             visitR = node.get_visits()
