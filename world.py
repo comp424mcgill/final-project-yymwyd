@@ -246,9 +246,9 @@ class World:
             cur_player_step = self.get_current_player_step()
             # Get allowed time in this step
             if cur_player_step == 0:
-                allowed_time_seconds = 30
+                allowed_time_seconds = 1000
             else:
-                allowed_time_seconds = 2
+                allowed_time_seconds = 1000
             # Method to enforce time limit
             with time_limit(allowed_time_seconds):
                 # Run the agents step function

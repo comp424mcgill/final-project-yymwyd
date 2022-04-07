@@ -42,6 +42,7 @@ class StudentAgent(Agent):
 
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
+        print("adv_pos is", adv_pos)
         root = Node(my_pos, None, None)
         endNode = None
         bestNode = None
@@ -52,18 +53,20 @@ class StudentAgent(Agent):
                 #print("root don't have children")
                 #if the node is never visited
                 if root.get_visits() == 0:
-                   # print("root is not visited")
+                    #print("root is not visited")
                     #simulate and back propagate
+                    print("the node being simulated", root.get_pos(), root.get_dir())
                     totalNum, numsuccess = self.m_simulate(chess_board, root, adv_pos)
+                    print("total num is:", totalNum, "num success is:", numsuccess)
                     #now the node is the root
-                    #print("before bp", root.get_pos(), root.get_dir())
                     root = self.backpropagation(root, totalNum, numsuccess)
-                    #print("after bp", root.get_pos(), root.get_dir())
+                    print("after bp", root.get_pos(), root.get_dir())
                     #print("root num visited is,", root.get_visits(), "num wins is", root.get_wins())
                     while root.get_parent() is not None:
                         root = root.get_parent()
                 #if the node is visited, but has no children, expand it
                 else:
+                    print("the root node to be expanded", root.get_pos(), root.get_dir())
                     endNode = self.expand(root, adv_pos, max_step, chess_board)
 
                     # if can't find more children return the leafNode
@@ -74,12 +77,15 @@ class StudentAgent(Agent):
             else:
                 chess_board = tempch
                 root = self.select(root, chess_board)
-                #print("the node selected", root.get_pos(), root.get_dir())
+                print("leafNode", root.get_pos(), root.get_dir())
+                print("updated chess board by selection", chess_board)
+                print("the leaf node selected", root.get_pos(), root.get_dir())
         while endNode.parent is not None:
             endNode = endNode.parent
         root = endNode
-        #print("the root i get", root.get_pos(), root.get_dir())
+
         bestNode = self.findBestUCT(root)
+        print("the node i get", bestNode.get_pos(), bestNode.get_dir())
 
         my_pos = bestNode.get_pos()
         dir = bestNode.get_dir()
@@ -216,7 +222,7 @@ class StudentAgent(Agent):
             elif value > bestUCT:
                 bestUCT = value
                 bestNode = key
-        #print("best uct is", bestUCT)
+        print("best uct is", bestUCT)
         return bestNode
 
     def select(self, rootNode, chess_board):  # start from the root node, select its children until leaf(uct can't decide)\
@@ -239,7 +245,10 @@ class StudentAgent(Agent):
 
         dir2 = rootNode.get_dir()
         r2, c2 = rootNode.get_pos()
+
         if(dir2 is not None):
+            print("the leaf node", r2, c2, dir2)
+            print("the chess board is updated", dir2)
             chess_board[r2, c2, dir2] = True
             move = moves[dir2]
             chess_board[r2 + move[0], c2 + move[1], opposites[dir2]] = True
@@ -275,10 +284,10 @@ class StudentAgent(Agent):
         i = 0
         # declare the global variables
         totalS = 0
-
-        while (i != 1):  # check time
+        print("chessboard before each simulation", chess_board)
+        while (i != 1):  # check time,
             tempC = deepcopy(chess_board)
-            self_turn = 0
+            self_turn = 1
             # random initialize p0 and p1 position, remember to change it after expansion
             success = self.run_simulation(tempC, my_pos, adv_pos, self_turn)
             if success == 1:
@@ -288,6 +297,7 @@ class StudentAgent(Agent):
         return i, totalS
 
     def random_walk(self, my_pos, adv_pos, max_step, chess_board):
+        print("take random walk")
         """
         Randomly walk to the next position in the board.
         Parameters
@@ -302,12 +312,12 @@ class StudentAgent(Agent):
         ori_pos = deepcopy(my_pos)
         steps = np.random.randint(0, max_step + 1)
         # Random Walk
+
         for _ in range(steps):
             r, c = my_pos
             dir = np.random.randint(0, 4)
             m_r, m_c = moves[dir]
             my_pos = (r + m_r, c + m_c)
-
             # Special Case enclosed by Adversary
             k = 0
             while chess_board[r, c, dir] or my_pos == adv_pos:
@@ -317,6 +327,7 @@ class StudentAgent(Agent):
                 dir = np.random.randint(0, 4)
                 m_r, m_c = moves[dir]
                 my_pos = (r + m_r, c + m_c)
+                print("in the random walk while loop")
 
             if k > 300:
                 my_pos = ori_pos
@@ -325,9 +336,15 @@ class StudentAgent(Agent):
             # Put Barrier
         dir = np.random.randint(0, 4)
         r, c = my_pos
-        # print("random walk",my_pos,chess_board[r, c])
+        print("random walk",my_pos,chess_board[r, c])
+
+        x = 0
         while chess_board[r, c, dir]:
             dir = np.random.randint(0, 4)
+            x = x+1
+            if(x>3):
+                print("cant get out:((((")
+                break
 
         return my_pos, dir
 
@@ -383,18 +400,19 @@ class StudentAgent(Agent):
 
     def simulation_step(self, chess_board, my_pos, adv_pos, self_turn):
 
+
         moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
         opposites = {0: 2, 1: 3, 2: 0, 3: 1}
         board_size = chess_board[0].shape[0]
         max_step = (board_size + 1) // 2
-        # global self_turn
-        # global p0_pos
-        # global p1_pos
 
         # adv is p0
         p0_pos = deepcopy(adv_pos)
         # my is p1
         p1_pos = deepcopy(my_pos)
+
+
+        x = deepcopy(chess_board)
 
         # if adv play
         if not self_turn:
@@ -405,8 +423,7 @@ class StudentAgent(Agent):
         else:
             cur_pos = np.asarray(p1_pos)
             adv_pos = p0_pos
-
-        next_pos, dir = self.random_walk(tuple(cur_pos), tuple(adv_pos), max_step, chess_board)
+        next_pos, dir = self.random_walk(tuple(cur_pos), tuple(adv_pos), max_step, x)
         next_pos = np.asarray(next_pos, dtype=cur_pos.dtype)
 
         # adv turn, next_pos is for adv
@@ -433,11 +450,12 @@ class StudentAgent(Agent):
         return next_pos, results, self_turn
         # remember to return the updated chessboard
 
-    def run_simulation(self, chess_board, my_pos, adv_pos,self_turn):
-        # global p0_pos
-        # global p1_pos
+    def run_simulation(self, chess_board, my_pos, adv_pos, self_turn):
+        r, c = my_pos
+        if chess_board[r,c, 0] and chess_board[r,c, 1] and chess_board[r,c, 2] and chess_board[r,c, 3]:
+            return -1
 
-        result = self.simulation_step(chess_board, my_pos, adv_pos,self_turn)
+        result = self.simulation_step(chess_board, my_pos, adv_pos, self_turn)
         is_end, p0_score, p1_score = result[1]
         self_turn = result[2]
 
@@ -447,6 +465,7 @@ class StudentAgent(Agent):
             adv_pos = result[0]
 
         while not is_end:
+            print("game not terminate")
             result = self.simulation_step(chess_board, my_pos, adv_pos,self_turn)
             is_end, p0_score, p1_score = result[1]
             self_turn = result[2]
@@ -454,6 +473,8 @@ class StudentAgent(Agent):
                 my_pos = result[0]
             else:
                 adv_pos = result[0]
+
+        print("game terminates")
 
         if p0_score > p1_score:  # adversary wins
             return -1
