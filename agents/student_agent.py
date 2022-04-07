@@ -49,17 +49,17 @@ class StudentAgent(Agent):
         while True:
             #if the node is a leaf node,
             if len(root.get_children()) == 0:
-                print("root don't have children")
+                #print("root don't have children")
                 #if the node is never visited
                 if root.get_visits() == 0:
-                    print("root is not visited")
+                   # print("root is not visited")
                     #simulate and back propagate
                     totalNum, numsuccess = self.m_simulate(chess_board, root, adv_pos)
                     #now the node is the root
-                    print("before bp", root.get_pos(), root.get_dir())
+                    #print("before bp", root.get_pos(), root.get_dir())
                     root = self.backpropagation(root, totalNum, numsuccess)
-                    print("after bp", root.get_pos(), root.get_dir())
-                    print("root num visited is,", root.get_visits(), "num wins is", root.get_wins())
+                    #print("after bp", root.get_pos(), root.get_dir())
+                    #print("root num visited is,", root.get_visits(), "num wins is", root.get_wins())
                     while root.get_parent() is not None:
                         root = root.get_parent()
                 #if the node is visited, but has no children, expand it
@@ -216,7 +216,7 @@ class StudentAgent(Agent):
             elif value > bestUCT:
                 bestUCT = value
                 bestNode = key
-        print("best uct is", bestUCT)
+        #print("best uct is", bestUCT)
         return bestNode
 
     def select(self, rootNode, chess_board):  # start from the root node, select its children until leaf(uct can't decide)\
@@ -265,7 +265,7 @@ class StudentAgent(Agent):
     def backpropagation(self, lastExpand, totalVisits, numWins):
         while lastExpand.get_parent() is not None:
             self.updateNode(lastExpand, totalVisits, numWins)
-            print("1 node visited is:", lastExpand.get_visits(), "1 node wins is", lastExpand.get_wins())
+            #print("1 node visited is:", lastExpand.get_visits(), "1 node wins is", lastExpand.get_wins())
             lastExpand = lastExpand.get_parent()
         self.updateNode(lastExpand, totalVisits, numWins)
         return lastExpand
@@ -276,13 +276,11 @@ class StudentAgent(Agent):
         # declare the global variables
         totalS = 0
 
-        while (i != 20):  # check time
+        while (i != 1):  # check time
             tempC = deepcopy(chess_board)
             self_turn = 0
             # random initialize p0 and p1 position, remember to change it after expansion
-            p0_pos = [0, 0]
-            p1_pos = [1, 1]
-            success = self.run_simulation(tempC, my_pos, adv_pos, p0_pos, p1_pos, self_turn)
+            success = self.run_simulation(tempC, my_pos, adv_pos, self_turn)
             if success == 1:
                 totalS = totalS + 1
             i += 1
@@ -383,7 +381,7 @@ class StudentAgent(Agent):
             player_win = -1  # Tie
         return True, p0_score, p1_score
 
-    def simulation_step(self, chess_board, my_pos, adv_pos, p0_pos, p1_pos, self_turn):
+    def simulation_step(self, chess_board, my_pos, adv_pos, self_turn):
 
         moves = ((-1, 0), (0, 1), (1, 0), (0, -1))
         opposites = {0: 2, 1: 3, 2: 0, 3: 1}
@@ -435,11 +433,11 @@ class StudentAgent(Agent):
         return next_pos, results, self_turn
         # remember to return the updated chessboard
 
-    def run_simulation(self, chess_board, my_pos, adv_pos, p0_pos, p1_pos, self_turn):
+    def run_simulation(self, chess_board, my_pos, adv_pos,self_turn):
         # global p0_pos
         # global p1_pos
 
-        result = self.simulation_step(chess_board, my_pos, adv_pos, p0_pos, p1_pos, self_turn)
+        result = self.simulation_step(chess_board, my_pos, adv_pos,self_turn)
         is_end, p0_score, p1_score = result[1]
         self_turn = result[2]
 
@@ -449,7 +447,7 @@ class StudentAgent(Agent):
             adv_pos = result[0]
 
         while not is_end:
-            result = self.simulation_step(chess_board, my_pos, adv_pos, p0_pos, p1_pos, self_turn)
+            result = self.simulation_step(chess_board, my_pos, adv_pos,self_turn)
             is_end, p0_score, p1_score = result[1]
             self_turn = result[2]
             if not self_turn:

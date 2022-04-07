@@ -41,12 +41,12 @@ class World:
         self,
         player_1="student_agent",
         player_2="random_agent",
-        board_size=6,
+        board_size=4,
         display_ui=False,
         display_delay=2,
         display_save=False,
         display_save_path=None,
-        autoplay=False,
+        autoplay=True,
     ):
         """
         Initialize the game world
