@@ -10,9 +10,6 @@ import copy
 import sys
 from store import register_agent
 
-import signal
-from contextlib import contextmanager
-
 
 @register_agent("student_agent")
 class StudentAgent(Agent):
