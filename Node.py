@@ -10,6 +10,7 @@ class Node:
                 self.dir = dir
                 self.parent = parent
                 self.children = dict() #(action:UCT)
+                self.level = 0
 
         #getter for  nodes
         def get_visits(self):
@@ -30,6 +31,8 @@ class Node:
         def get_parent(self):
                 return self.parent
 
+        def get_level(self):
+                return self.level
         #setter for nodes
         def set_visits(self, v):
                 self.num_visited = v
@@ -43,6 +46,10 @@ class Node:
         #add children
         def set_children(self, c):
                 self.children = c
+        
+        #setter for level
+        def set_level(self, l):
+                self.level =  l
 
 
 
