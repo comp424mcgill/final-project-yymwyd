@@ -57,7 +57,7 @@ class StudentAgent(Agent):
         # my pos
         p1_pos = my_pos
         d = 0
-        while d <= 4:
+        while d < 4:
             # if the node is a leaf node,
             if len(root.get_children()) == 0:
                 # print("root don't have children")
@@ -126,9 +126,8 @@ class StudentAgent(Agent):
                 print("d is:", d)
                 # print("updated chess board by selection", original_c)
 
-        while endNode.parent is not None:
-            endNode = endNode.parent
-        root = endNode
+        while root.parent is not None:
+            root = root.parent
 
         bestNode = self.findBestUCT(root)
         print("the node i get", bestNode.get_pos(), bestNode.get_dir())
