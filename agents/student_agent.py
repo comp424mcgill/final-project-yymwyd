@@ -99,14 +99,14 @@ class StudentAgent(Agent):
                         else:
                             p1_pos = my_pos
                         p0_pos = root.get_pos()
-                        self.expand(root, p0_pos, p1_pos, max_step, original_c)
+                        self.expand(root, p1_pos, p0_pos, max_step, original_c)
                     else:
                         print("level is even, cur node is me, next move is adv")
                         p1_pos = root.get_pos()
                         print("my pos is", p1_pos)
                         p0_pos = root.get_parent().get_pos()
                         print("adv pos is", p0_pos)
-                        self.expand(root, p1_pos, p0_pos, max_step, original_c)
+                        self.expand(root, p0_pos, p1_pos, max_step, original_c)
 
                     # if can't find more children return the leafNode
                     # if endNode is not None:
