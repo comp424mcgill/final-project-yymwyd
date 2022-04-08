@@ -73,8 +73,8 @@ class StudentAgent(Agent):
         start_time = time()
         while True:
             if time() - start_time >= 1 or d > 3:
-                print("time difference",time() - start_time)
-                print("the loo[p is out1!!!!!!!")
+                #print("time difference",time() - start_time)
+                #print("the loo[p is out1!!!!!!!")
                 break
             #print("d is:", d)
             # if the node is a leaf node,
@@ -143,11 +143,11 @@ class StudentAgent(Agent):
                     tree_self_turn = 0
                 d = root.get_level()
                 # print("updated chess board by selection", original_c)
-        print("leaf root is", root.get_pos(), root.get_dir())
+        #print("leaf root is", root.get_pos(), root.get_dir())
 
         while root.parent is not None:
             root = root.parent
-        print("root is", root.get_pos(), root.get_dir())
+        #print("root is", root.get_pos(), root.get_dir())
         bestNode = self.findBestUCT(root)
 
         #print("the node i get", bestNode.get_pos(), bestNode.get_dir())
