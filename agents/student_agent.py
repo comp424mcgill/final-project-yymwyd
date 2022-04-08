@@ -42,9 +42,9 @@ class StudentAgent(Agent):
 
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
-        print("adv_pos is", adv_pos)
-        print("my_pos is", my_pos)
-        print("original chess_board", chess_board)
+        #print("adv_pos is", adv_pos)
+        #print("my_pos is", my_pos)
+        #print("original chess_board", chess_board)
         root = Node(adv_pos, None, None)
         root.set_level(1)
         endNode = None
@@ -56,8 +56,9 @@ class StudentAgent(Agent):
         p0_pos = adv_pos
         # my pos
         p1_pos = my_pos
-        d = 0
-        while d < 4:
+        d = 1
+        while d < 3:
+            #print("d is:", d)
             # if the node is a leaf node,
             if len(root.get_children()) == 0:
                 # print("root don't have children")
@@ -67,45 +68,45 @@ class StudentAgent(Agent):
                     # simulate and back propagate
                     # when adv node is the one need to be simulated(aka start from me)
                     if tree_self_turn == 1:
-                        print("level is odd, cur node is adv, next move is mine")
+                        #print("level is odd, cur node is adv, next move is mine")
                         if root.get_parent() is not None:
                             p1_pos = root.get_parent().get_pos()
                         else:
                             p1_pos = my_pos
                         p0_pos = root.get_pos()
                     else:
-                        print("level is even, cur node is me, next move is adv")
+                        #print("level is even, cur node is me, next move is adv")
                         p1_pos = root.get_pos()
-                        print("my pos is", p1_pos)
+                        #print("my pos is", p1_pos)
                         p0_pos = root.get_parent().get_pos()
-                        print("adv pos is", p0_pos)
-                    print("the node being simulated", root.get_pos(), root.get_dir())
+                        #print("adv pos is", p0_pos)
+                    #print("the node being simulated", root.get_pos(), root.get_dir())
                     totalNum, numsuccess = self.m_simulate(original_c, p1_pos, p0_pos, tree_self_turn)
-                    print("total num is:", totalNum, "num success is:", numsuccess)
+                    #print("total num is:", totalNum, "num success is:", numsuccess)
                     # now the node is the real upper root
                     root = self.backpropagation(root, totalNum, numsuccess)
-                    print("after bp", root.get_pos(), root.get_dir())
-                    print("root num visited is,", root.get_visits(), "num wins is", root.get_wins())
+                    #print("after bp", root.get_pos(), root.get_dir())
+                    #print("root num visited is,", root.get_visits(), "num wins is", root.get_wins())
                     while root.get_parent() is not None:
                         root = root.get_parent()
                 # if the node is visited, but has no children, expand it
                 else:
-                    print("the node to be expanded", root.get_pos(), root.get_dir())
+                    #print("the node to be expanded", root.get_pos(), root.get_dir())
                     if tree_self_turn == 1:
-                        print("level is odd, cur node is adv, next move is mine")
+                        #print("level is odd, cur node is adv, next move is mine")
                         if root.get_parent() is not None:
-                            print("the third level should go in this block")
+                            #print("the third level should go in this block")
                             p1_pos = root.get_parent().get_pos()
                         else:
                             p1_pos = my_pos
                         p0_pos = root.get_pos()
                         self.expand(root, p1_pos, p0_pos, max_step, original_c)
                     else:
-                        print("level is even, cur node is me, next move is adv")
+                        #print("level is even, cur node is me, next move is adv")
                         p1_pos = root.get_pos()
-                        print("my pos is", p1_pos)
+                        #print("my pos is", p1_pos)
                         p0_pos = root.get_parent().get_pos()
-                        print("adv pos is", p0_pos)
+                        #print("adv pos is", p0_pos)
                         self.expand(root, p0_pos, p1_pos, max_step, original_c)
 
                     # if can't find more children return the leafNode
@@ -116,26 +117,25 @@ class StudentAgent(Agent):
             else:
                 original_c = deepcopy(tempch)
                 root = self.select(root, original_c)
-                print("the leaf node selected", root.get_pos(), root.get_dir())
-                print("the leaf node level is", root.get_level())
+                #print("the leaf node selected", root.get_pos(), root.get_dir())
+                #print("the leaf node level is", root.get_level())
                 if (root.get_level() % 2 == 1):
                     tree_self_turn = 1
                 else:
                     tree_self_turn = 0
                 d = root.get_level()
-                print("d is:", d)
                 # print("updated chess board by selection", original_c)
 
         while root.parent is not None:
             root = root.parent
 
         bestNode = self.findBestUCT(root)
-        print("the node i get", bestNode.get_pos(), bestNode.get_dir())
+        #print("the node i get", bestNode.get_pos(), bestNode.get_dir())
 
         my_pos = bestNode.get_pos()
         dir = bestNode.get_dir()
 
-        # print("the node that I returned", my_pos, dir)
+        #print("---------------------------------------------------the node that I returned--------------------------------------------------", my_pos, dir)
         return my_pos, dir
 
     def check_valid_step(self, chess_board, start_pos, end_pos, adv_pos, barrier_dir, step):
@@ -278,8 +278,8 @@ class StudentAgent(Agent):
         # calculate UCTs for all children of this node
         self.calculateUCT(rootNode)
         # iterate through all children of this node
-        for key, value in rootChildren.items():
-            print("children, uct value", key.get_pos(), key.get_dir(), value)
+        #for key, value in rootChildren.items():
+            #print("children, uct value", key.get_pos(), key.get_dir(), value)
         for key, value in rootChildren.items():
 
             if value == math.inf:
@@ -289,8 +289,8 @@ class StudentAgent(Agent):
 
                 bestUCT = value
                 bestNode = key
-        print("bestNode is", bestNode.get_pos(), bestNode.get_dir())
-        print("best uct is", bestUCT)
+        #print("bestNode is", bestNode.get_pos(), bestNode.get_dir())
+        #print("best uct is", bestUCT)
         return bestNode
 
     def select(self, rootNode,
@@ -344,9 +344,9 @@ class StudentAgent(Agent):
         return lastExpand
 
     def m_simulate(self, chess_board, my_pos, adv_pos, tree_self_turn):
-        print("in m simulation, my_pos is", my_pos)
-        print("in m simulation, adv_pos is", adv_pos)
-        print("in tree_self_turn, self turn is", tree_self_turn)
+        #print("in m simulation, my_pos is", my_pos)
+        #print("in m simulation, adv_pos is", adv_pos)
+        #print("in tree_self_turn, self turn is", tree_self_turn)
         i = 0
         # declare the global variables
         totalS = 0

@@ -41,7 +41,7 @@ class World:
         self,
         player_1="student_agent",
         player_2="random_agent",
-        board_size=3,
+        board_size=4,
         display_ui=False,
         display_delay=2,
         display_save=False,
@@ -246,9 +246,9 @@ class World:
             cur_player_step = self.get_current_player_step()
             # Get allowed time in this step
             if cur_player_step == 0:
-                allowed_time_seconds = 1000
+                allowed_time_seconds = 30
             else:
-                allowed_time_seconds = 1000
+                allowed_time_seconds = 2
             # Method to enforce time limit
             with time_limit(allowed_time_seconds):
                 # Run the agents step function
