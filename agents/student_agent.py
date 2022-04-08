@@ -1,7 +1,7 @@
 # Student agent: Add your own agent here
 from agents.agent import Agent
 import numpy as np
-from Node import *
+from agents.Node import Node
 # from agent import Agent
 import math
 from time import sleep, time
@@ -32,24 +32,10 @@ class StudentAgent(Agent):
         }
         self.cur_step = 0
 
-    @contextmanager
-    def time_limit(self,seconds):
-        def signal_handler(signum, frame):
-            raise TimeoutException("Execution timed out!")
-
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(seconds)
-        try:
-            yield
-        finally:
-            signal.alarm(0)
 
     def step(self, chess_board, my_pos, adv_pos, max_step):
-        self.cur_step = self.cur_step + 1
-        #if(self.cur_step == 1):
-            #time_limit = time.time() + 29.5
-        #else:
-            #time_limit = time.time() + 1.5
+
+
         """
         Implement the step function of your agent here.
         You can use the following variables to access the chess board:
@@ -57,16 +43,15 @@ class StudentAgent(Agent):
         - my_pos: a tuple of (x, y)
         - adv_pos: a tuple of (x, y)
         - max_step: an integer
-
         You should return a tuple of ((x, y), dir),
         where (x, y) is the next position of your agent and dir is the direction of the wall
         you want to put on.
-
         Please check the sample implementation in agents/random_agent.py or agents/human_agent.py for more details.
         """
         #print("adv_pos is", adv_pos)
         #print("my_pos is", my_pos)
         #print("original chess_board", chess_board)
+        self.cur_step = self.cur_step + 1
         root = Node(adv_pos, None, None)
         root.set_level(1)
         endNode = None
@@ -78,9 +63,17 @@ class StudentAgent(Agent):
         p0_pos = adv_pos
         # my pos
         p1_pos = my_pos
-        #d = 1
-
-        with self.time_limit(2):
+        d = 1
+        if(self.cur_step == 1):
+            time_limit = time() + 29.5
+        else:
+            time_limit = time() + 1.5
+        start_time = time()
+        while True:
+            if time() - start_time >= 1 or d > 3:
+                #print("time difference",time() - start_time)
+                #print("the loo[p is out1!!!!!!!")
+                break
             #print("d is:", d)
             # if the node is a leaf node,
             if len(root.get_children()) == 0:
@@ -146,20 +139,21 @@ class StudentAgent(Agent):
                     tree_self_turn = 1
                 else:
                     tree_self_turn = 0
-                #d = root.get_level()
+                d = root.get_level()
                 # print("updated chess board by selection", original_c)
+        #print("leaf root is", root.get_pos(), root.get_dir())
 
         while root.parent is not None:
             root = root.parent
-
+        #print("root is", root.get_pos(), root.get_dir())
         bestNode = self.findBestUCT(root)
-        #print("the node i get", bestNode.get_pos(), bestNode.get_dir())
 
+        #print("the node i get", bestNode.get_pos(), bestNode.get_dir())
         my_pos = bestNode.get_pos()
         dir = bestNode.get_dir()
-
-        #print("---------------------------------------------------the node that I returned--------------------------------------------------", my_pos, dir)
         return my_pos, dir
+        #print("---------------------------------------------------the node that I returned--------------------------------------------------", my_pos, dir)
+
 
     def check_valid_step(self, chess_board, start_pos, end_pos, adv_pos, barrier_dir, step):
         """
@@ -373,7 +367,10 @@ class StudentAgent(Agent):
         i = 0
         # declare the global variables
         totalS = 0
+        startTime = time()
         while (i != 5):  # check time,
+            if time() - startTime >= 0.5:
+                break
             tempC = deepcopy(chess_board)
             default_self_turn = deepcopy(tree_self_turn)
             # random initialize p0 and p1 position, remember to change it after expansion
@@ -579,87 +576,61 @@ def main():
     x[-1, :, 2] = True
     x[:, -1, 1] = True
     chess_board = x
-
-
     # given my position and adversary position
     my_pos = (2, 2)
     adv_pos = (0, 1)
-
     # max step is given
     step = 2
-
     sa = StudentAgent()
-
     # initialize root node
     root = Node(my_pos, None, None)
-
-
     # test for find all children
-
     children = sa.getActions(root, adv_pos, 2, x)
     for i in range(len(children)):
         print(children[i].my_pos, children[i].dir)
-
-
     #test for select
     sa.select(root, chess_board)
     print(root.get_pos())
-
-
     # test for expand
     sa.expand(root, adv_pos, step, chess_board)
     children = root.get_children()
     for key, value in children.items():
         print("in loop")
         print(key.get_pos(), key.get_dir(), value)
-
-
     # test for simulation
     self_turn = 0
     # random initialize p0 and p1 position, remember to change it after expansion
     p0_pos = [0, 0]
     p1_pos = [1, 1]
     print(sa.run_simulation(x, my_pos, adv_pos, p0_pos, p1_pos, self_turn))
-
-
-
     # test for backpropagation
-
     success = sa.m_simulate(chess_board, root, adv_pos)
     sa.backpropagation(root, success)
     print("it is visited:", root.get_visits(), "num of success", root.get_wins())
     #test for the game logic with find best UCT
-
     #1. the root is not visited and not simulated before
     totalvisits, numwins = sa.m_simulate(chess_board, root, adv_pos)
     returned_node = sa.backpropagation(root, totalvisits, numwins)
     print("root node is:", root.get_pos(), "returned node is:", returned_node.get_pos())
     print("returned node is visited:", returned_node.get_visits(),"returned node wins:", returned_node.get_wins())
-
-
     #2. the root is simulated and visited, but is the leaf node, so expand the game tree
     sa.select(root,chess_board)
     sa.expand(root, adv_pos, step, chess_board)
     children = root.get_children()
     for key, value in children.items():
         print(key.get_pos())
-
-
     #3. the root is no longer a leaf node, find the best uct among its children
     cur_node = sa.findBestUCT(root)
     print("root node is:", root.get_pos(), root.get_dir(),"current node is:", cur_node.get_pos(), cur_node.get_dir())
-
     #4. move to the next layer, if the current node has not been visited, simulate
     if not cur_node.get_children():
         print("cur node no children")
     if cur_node.get_visits() == 0:
         totalVisits, numWins = sa.m_simulate(chess_board,cur_node, adv_pos)
-
         #5. backpropagation of the success rate and to see whether the root node is returned
         returned_node = sa.backpropagation(cur_node, totalVisits, numWins)
         print("the returned node is:", returned_node.get_pos(), returned_node.get_dir(),
               "its total visits is:", returned_node.get_visits(), "its total wins is:", returned_node.get_wins())
-
     #6. the current node is now visited, but since it is a leaf node, it need to be expanded
     sa.select(returned_node, chess_board)
     sa.expand(returned_node, adv_pos, step, chess_board)
@@ -668,19 +639,12 @@ def main():
         print(key.get_pos(), key.get_dir())
     #7. the current node is now visited, and no longer a leaf node. move to the next layer
     third_node = sa.findBestUCT(returned_node)
-
     #8 move to the next 
-
-
-
-
     #test for findBestUCT
     while cur_node.get_parent() is not None:
         cur_node = cur_node.get_parent()
     best_node = sa.findBestUCT(cur_node)
     print("the root's best UCT is ")
-
-
 if __name__ == "__main__":
     main()
 '''
