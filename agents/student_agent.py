@@ -91,7 +91,21 @@ class StudentAgent(Agent):
                 # if the node is visited, but has no children, expand it
                 else:
                     print("the node to be expanded", root.get_pos(), root.get_dir())
-                    endNode = self.expand(root, adv_pos, max_step, original_c)
+                    if tree_self_turn == 1:
+                        print("level is odd, cur node is adv, next move is mine")
+                        if root.get_parent() is not None:
+                            p1_pos = root.get_parent().get_pos()
+                        else:
+                            p1_pos = my_pos
+                        p0_pos = root.get_pos()
+                    else:
+                        print("level is even, cur node is me, next move is adv")
+                        p1_pos = root.get_pos()
+                        print("my pos is", p1_pos)
+                        p0_pos = root.get_parent().get_pos()
+                        print("adv pos is", p0_pos)
+
+                    self.expand(root, p1_pos, p0_pos, max_step, original_c)
 
                     # if can't find more children return the leafNode
                     # if endNode is not None:
@@ -169,10 +183,9 @@ class StudentAgent(Agent):
         return is_reached
 
     # get all actions under the root Node
-    def getActions(self, rootNode, adv_pos, step, chess_board):
+    def getActions(self, rootNode, my_pos, adv_pos, step, chess_board):
         # boardsize chess_board.boardsize
         x = chess_board[0].shape[0]
-        my_pos = rootNode.get_pos()
         actions = []
         uPos = []
         for r in range(step + 1):
@@ -218,8 +231,6 @@ class StudentAgent(Agent):
                     if next_pos4 not in uPos:
                         uPos.append(next_pos4)
 
-        for x in uPos:
-            print(x)
 
         if len(uPos) != 0:
             for z in uPos:
@@ -310,11 +321,9 @@ class StudentAgent(Agent):
 
         return rootNode
 
-    def expand(self, leafNode, adv_pos, step, chess_board):  # add all children to the leaf node
-        AllChildren = self.getActions(leafNode, adv_pos, step, chess_board)
+    def expand(self, leafNode, my_pos, adv_pos, step, chess_board):  # add all children to the leaf node
+        AllChildren = self.getActions(leafNode, my_pos, adv_pos, step, chess_board)
 
-        if len(AllChildren) == 0:
-            return leafNode
         children = dict()
         for i in range(len(AllChildren)):
             children[AllChildren[i]] = math.inf
