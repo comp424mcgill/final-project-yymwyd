@@ -53,9 +53,9 @@ class StudentAgent(Agent):
         original_c = deepcopy(chess_board)
         tree_self_turn = 1
         # adv pos
-        p0_pos = 0
+        p0_pos = adv_pos
         # my pos
-        p1_pos = 0
+        p1_pos = my_pos
         d = 0
         while d <= 4:
             # if the node is a leaf node,
@@ -82,7 +82,7 @@ class StudentAgent(Agent):
                     print("the node being simulated", root.get_pos(), root.get_dir())
                     totalNum, numsuccess = self.m_simulate(original_c, p1_pos, p0_pos, tree_self_turn)
                     print("total num is:", totalNum, "num success is:", numsuccess)
-                    # now the node is the root
+                    # now the node is the real upper root
                     root = self.backpropagation(root, totalNum, numsuccess)
                     print("after bp", root.get_pos(), root.get_dir())
                     print("root num visited is,", root.get_visits(), "num wins is", root.get_wins())
@@ -94,18 +94,19 @@ class StudentAgent(Agent):
                     if tree_self_turn == 1:
                         print("level is odd, cur node is adv, next move is mine")
                         if root.get_parent() is not None:
+                            print("the third level should go in this block")
                             p1_pos = root.get_parent().get_pos()
                         else:
                             p1_pos = my_pos
                         p0_pos = root.get_pos()
+                        self.expand(root, p0_pos, p1_pos, max_step, original_c)
                     else:
                         print("level is even, cur node is me, next move is adv")
                         p1_pos = root.get_pos()
                         print("my pos is", p1_pos)
                         p0_pos = root.get_parent().get_pos()
                         print("adv pos is", p0_pos)
-
-                    self.expand(root, p1_pos, p0_pos, max_step, original_c)
+                        self.expand(root, p1_pos, p0_pos, max_step, original_c)
 
                     # if can't find more children return the leafNode
                     # if endNode is not None:
