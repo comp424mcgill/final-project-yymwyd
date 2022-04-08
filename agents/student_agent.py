@@ -32,10 +32,24 @@ class StudentAgent(Agent):
         }
         self.cur_step = 0
 
+    @contextmanager
+    def time_limit(self,seconds):
+        def signal_handler(signum, frame):
+            raise TimeoutException("Execution timed out!")
+
+        signal.signal(signal.SIGALRM, signal_handler)
+        signal.alarm(seconds)
+        try:
+            yield
+        finally:
+            signal.alarm(0)
 
     def step(self, chess_board, my_pos, adv_pos, max_step):
-
-
+        self.cur_step = self.cur_step + 1
+        #if(self.cur_step == 1):
+            #time_limit = time.time() + 29.5
+        #else:
+            #time_limit = time.time() + 1.5
         """
         Implement the step function of your agent here.
         You can use the following variables to access the chess board:
@@ -53,7 +67,6 @@ class StudentAgent(Agent):
         #print("adv_pos is", adv_pos)
         #print("my_pos is", my_pos)
         #print("original chess_board", chess_board)
-        self.cur_step = self.cur_step + 1
         root = Node(adv_pos, None, None)
         root.set_level(1)
         endNode = None
@@ -65,6 +78,7 @@ class StudentAgent(Agent):
         p0_pos = adv_pos
         # my pos
         p1_pos = my_pos
+<<<<<<< HEAD
         d = 1
         if(self.cur_step == 1):
             time_limit = time() + 29.5
@@ -76,6 +90,11 @@ class StudentAgent(Agent):
                 #print("time difference",time() - start_time)
                 #print("the loo[p is out1!!!!!!!")
                 break
+=======
+        #d = 1
+
+        with self.time_limit(2):
+>>>>>>> parent of 542ad17 (time module)
             #print("d is:", d)
             # if the node is a leaf node,
             if len(root.get_children()) == 0:
@@ -141,21 +160,29 @@ class StudentAgent(Agent):
                     tree_self_turn = 1
                 else:
                     tree_self_turn = 0
-                d = root.get_level()
+                #d = root.get_level()
                 # print("updated chess board by selection", original_c)
+<<<<<<< HEAD
         #print("leaf root is", root.get_pos(), root.get_dir())
 
         while root.parent is not None:
             root = root.parent
         #print("root is", root.get_pos(), root.get_dir())
         bestNode = self.findBestUCT(root)
+=======
 
+        while root.parent is not None:
+            root = root.parent
+>>>>>>> parent of 542ad17 (time module)
+
+        bestNode = self.findBestUCT(root)
         #print("the node i get", bestNode.get_pos(), bestNode.get_dir())
+
         my_pos = bestNode.get_pos()
         dir = bestNode.get_dir()
-        return my_pos, dir
-        #print("---------------------------------------------------the node that I returned--------------------------------------------------", my_pos, dir)
 
+        #print("---------------------------------------------------the node that I returned--------------------------------------------------", my_pos, dir)
+        return my_pos, dir
 
     def check_valid_step(self, chess_board, start_pos, end_pos, adv_pos, barrier_dir, step):
         """
@@ -369,10 +396,7 @@ class StudentAgent(Agent):
         i = 0
         # declare the global variables
         totalS = 0
-        startTime = time()
         while (i != 5):  # check time,
-            if time() - startTime >= 1:
-                break
             tempC = deepcopy(chess_board)
             default_self_turn = deepcopy(tree_self_turn)
             # random initialize p0 and p1 position, remember to change it after expansion
