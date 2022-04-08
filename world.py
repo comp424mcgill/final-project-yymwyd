@@ -41,7 +41,7 @@ class World:
         self,
         player_1="student_agent",
         player_2="random_agent",
-        board_size=4,
+        board_size=None,
         display_ui=False,
         display_delay=2,
         display_save=False,
