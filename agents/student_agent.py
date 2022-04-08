@@ -79,6 +79,7 @@ class StudentAgent(Agent):
         # my pos
         p1_pos = my_pos
 <<<<<<< HEAD
+<<<<<<< HEAD
         d = 1
         if(self.cur_step == 1):
             time_limit = time() + 29.5
@@ -90,6 +91,11 @@ class StudentAgent(Agent):
                 #print("time difference",time() - start_time)
                 #print("the loo[p is out1!!!!!!!")
                 break
+=======
+        #d = 1
+
+        with self.time_limit(2):
+>>>>>>> parent of 542ad17 (time module)
 =======
         #d = 1
 
@@ -163,12 +169,18 @@ class StudentAgent(Agent):
                 #d = root.get_level()
                 # print("updated chess board by selection", original_c)
 <<<<<<< HEAD
+<<<<<<< HEAD
         #print("leaf root is", root.get_pos(), root.get_dir())
 
         while root.parent is not None:
             root = root.parent
         #print("root is", root.get_pos(), root.get_dir())
         bestNode = self.findBestUCT(root)
+=======
+
+        while root.parent is not None:
+            root = root.parent
+>>>>>>> parent of 542ad17 (time module)
 =======
 
         while root.parent is not None:
