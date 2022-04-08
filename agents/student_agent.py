@@ -4,14 +4,11 @@ import numpy as np
 from Node import *
 # from agent import Agent
 import math
-from time import sleep, time
+import time
 from copy import deepcopy
 import copy
 import sys
 from store import register_agent
-
-import signal
-from contextlib import contextmanager
 
 
 @register_agent("student_agent")
@@ -32,24 +29,7 @@ class StudentAgent(Agent):
         }
         self.cur_step = 0
 
-    @contextmanager
-    def time_limit(self,seconds):
-        def signal_handler(signum, frame):
-            raise TimeoutException("Execution timed out!")
-
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(seconds)
-        try:
-            yield
-        finally:
-            signal.alarm(0)
-
     def step(self, chess_board, my_pos, adv_pos, max_step):
-        self.cur_step = self.cur_step + 1
-        #if(self.cur_step == 1):
-            #time_limit = time.time() + 29.5
-        #else:
-            #time_limit = time.time() + 1.5
         """
         Implement the step function of your agent here.
         You can use the following variables to access the chess board:
@@ -79,8 +59,13 @@ class StudentAgent(Agent):
         # my pos
         p1_pos = my_pos
         #d = 1
-
-        with self.time_limit(2):
+        self.cur_step = self.cur_step + 1
+        if (self.cur_step == 1):
+            time_limit = time.time() + 2
+        else:
+            time_limit = time.time() + 1.5
+        while time.time()<time_limit:
+            print("time is", time.time())
             #print("d is:", d)
             # if the node is a leaf node,
             if len(root.get_children()) == 0:
