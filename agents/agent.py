@@ -5,7 +5,7 @@ class Agent:
         """
         self.name = "DummyAgent"
         # Flag to indicate whether the agent can be used to autoplay
-        self.autoplay = False
+        self.autoplay = True
 
     def __str__(self) -> str:
         return self.name
@@ -33,4 +33,5 @@ class Agent:
         dir : int
             The direction of the agent, as defined in world.py (DIRECTION_UP/DIRECTION_DOWN/DIRECTION_LEFT/DIRECTION_RIGHT).
         """
+        
         pass

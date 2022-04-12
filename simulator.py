@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--player_1", type=str, default="random_agent")
+    parser.add_argument("--player_1", type=str, default="student_agent")
     parser.add_argument("--player_2", type=str, default="random_agent")
     parser.add_argument("--board_size", type=int, default=None)
     parser.add_argument(
@@ -27,12 +27,12 @@ def get_args():
         default=12,
         help="In autoplay mode, the maximum board size",
     )
-    parser.add_argument("--display", action="store_true", default=False)
+    parser.add_argument("--display", action="store_true", default=True)
     parser.add_argument("--display_delay", type=float, default=0.4)
     parser.add_argument("--display_save", action="store_true", default=False)
     parser.add_argument("--display_save_path", type=str, default="plots/")
-    parser.add_argument("--autoplay", action="store_true", default=False)
-    parser.add_argument("--autoplay_runs", type=int, default=1000)
+    parser.add_argument("--autoplay", action="store_true", default=True)
+    parser.add_argument("--autoplay_runs", type=int, default=100)
     args = parser.parse_args()
     return args
 
@@ -108,7 +108,9 @@ class Simulator:
                 p0_score, p1_score, p0_time, p1_time = self.run(
                     swap_players=swap_players, board_size=board_size
                 )
+                
                 if swap_players:
+
                     p0_score, p1_score, p0_time, p1_time = (
                         p1_score,
                         p0_score,
